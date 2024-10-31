@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class CompanyappApplication {
 
 	public static void main(String[] args) {
+        System.setProperty("spring.profiles.active", "secrets");
 		SpringApplication.run(CompanyappApplication.class, args);
 //
 //		try {

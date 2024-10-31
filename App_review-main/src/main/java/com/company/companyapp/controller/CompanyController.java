@@ -1,14 +1,28 @@
 package com.company.companyapp.controller;
 
+import com.company.companyapp.DTO.Profile;
+import com.company.companyapp.error.ErrorResponse;
 import com.company.companyapp.model.Company;
 import com.company.companyapp.model.Review;
 import com.company.companyapp.repository.CompanyRepository;
 import com.company.companyapp.repository.ReviewRepository;
 import com.company.companyapp.service.CompanyService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +39,9 @@ public class CompanyController {
 
     @Autowired
     private ReviewRepository reviewRepository;
-
+    @Autowired
+    private RestTemplate restTemplate;
+    private Logger logger = LoggerFactory.getLogger(CompanyController.class);
     // Endpoint to fetch all company names
     @GetMapping("/allNames")
     public ResponseEntity<List<String>> getAllCompanyNames() {
@@ -85,13 +101,54 @@ public class CompanyController {
 
     // Modified addCompany endpoint to prevent duplicate companies
     @PostMapping("/addCompany")
-    public ResponseEntity<String> addCompany(@RequestBody Company companyDetails) {
+    public ResponseEntity<?> addCompany(@RequestBody Company companyDetails) {
         Optional<Company> existingCompany = companyRepository.findByName(companyDetails.getName());
         if (existingCompany.isPresent()) {
             return ResponseEntity.badRequest().body("Company already exists!");
         }
+        String url = "http://localhost:8083/profile/getProfile?countryCode="
+                +URLEncoder.encode(companyDetails.getOwner().getCountryCode(),StandardCharsets.UTF_8)+"&number="+companyDetails.getOwner().getNumber();
 
-        companyRepository.save(companyDetails);
-        return ResponseEntity.ok("Company added successfully!");
+        logger.info("url -> "+url);
+        try {
+            // Make the API call
+            ResponseEntity<Object> response = restTemplate.getForEntity(url, Object.class);
+
+            // Initialize the ObjectMapper to map JSON dynamically
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.valueToTree(response.getBody());
+
+            // Check if the response structure matches Profile or ErrorResponse
+            if (jsonNode.has("id") && jsonNode.has("phoneNumber")) {
+                // Map response to Profile
+                Profile profile = mapper.treeToValue(jsonNode, Profile.class);
+                logger.info("Received Profile response: " + profile);
+
+                if (profile.isVerified()) {
+                    return ResponseEntity.ok(companyRepository.save(companyDetails));
+                } else {
+                    return ResponseEntity.badRequest().body("Please get your profile with number -> "
+                            + companyDetails.getOwner().getCountryCode() + " " + companyDetails.getOwner().getNumber() + " verified");
+                }
+            } else if (jsonNode.has("timestamp") && jsonNode.has("message")) {
+                // Map response to ErrorResponse
+                ErrorResponse errorResponse = mapper.treeToValue(jsonNode, ErrorResponse.class);
+                logger.info("Received ErrorResponse: " + errorResponse);
+
+                return ResponseEntity.badRequest().body("Please register your profile with provided phone number");
+            } else {
+                // Unexpected response structure
+                logger.info("Unexpected response structure: " + jsonNode);
+                return ResponseEntity.internalServerError().body("Unexpected response type");
+            }
+        } catch (RestClientException e) {
+            // Handle any REST client exceptions
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body("Error retrieving profile: " + e.getMessage());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
+
+
 }
