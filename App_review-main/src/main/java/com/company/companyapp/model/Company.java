@@ -1,6 +1,8 @@
 package com.company.companyapp.model;
 
+import com.company.companyapp.DTO.CallerID;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "company")
@@ -8,24 +10,19 @@ public class Company {
 
     @Id
     private String id;
+    @Indexed(unique = true)
     private String name;
+    private CallerID owner;
     private String description;
     private int followers;
     private double rating; // New field for storing average rating
-
-    // Constructors, getters, and setters
-    public Company(String name, String description) {
+    public Company(){}
+    public Company(String id, String name, CallerID owner, String description, int followers, double rating) {
+        this.id = id;
         this.name = name;
+        this.owner = owner;
         this.description = description;
-        this.rating = 0.0; // Initialize the rating to zero or appropriate default
-    }
-
-    // Getters and Setters for the rating field
-    public double getRating() {
-        return rating;
-    }
-
-    public void setRating(double rating) {
+        this.followers = followers;
         this.rating = rating;
     }
 
@@ -45,6 +42,14 @@ public class Company {
         this.name = name;
     }
 
+    public CallerID getOwner() {
+        return owner;
+    }
+
+    public void setOwner(CallerID owner) {
+        this.owner = owner;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -61,5 +66,11 @@ public class Company {
         this.followers = followers;
     }
 
+    public double getRating() {
+        return rating;
+    }
 
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
 }

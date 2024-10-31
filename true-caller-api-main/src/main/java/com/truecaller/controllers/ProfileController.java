@@ -45,7 +45,11 @@ public class ProfileController {
     @GetMapping("/getProfile")
     @ResponseBody
     public ResponseEntity<?> getProfile(@ModelAttribute CallerID callerId){
-        logger.info("In api controller"+callerId.toString());
+        logger.info("In api controller before"+callerId.toString());
+        if(callerId.getCountryCode().equals("%2B91")){
+            callerId.setCountryCode(callerId.getCountryCode().replace("%2B","+"));
+        }
+        logger.info("In api controller after"+callerId.toString());
         Profile profile = profileService.getProfileByCallerID(callerId.getNumber(),callerId.getCountryCode())
                         .orElseThrow(() -> new ProfileNotFoundException("Profile with phone number : "
                                 + callerId.getCountryCode() + " " + callerId.getNumber() + " not found."));
