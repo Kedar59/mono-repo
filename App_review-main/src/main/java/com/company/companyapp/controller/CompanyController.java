@@ -12,14 +12,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.Marker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -41,7 +39,7 @@ public class CompanyController {
     private ReviewRepository reviewRepository;
     @Autowired
     private RestTemplate restTemplate;
-    private Logger logger = LoggerFactory.getLogger(CompanyController.class);
+    private final Logger logger = LoggerFactory.getLogger(CompanyController.class);
     // Endpoint to fetch all company names
     @GetMapping("/allNames")
     public ResponseEntity<List<String>> getAllCompanyNames() {
