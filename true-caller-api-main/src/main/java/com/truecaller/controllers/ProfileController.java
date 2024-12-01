@@ -46,7 +46,7 @@ public class ProfileController {
     @ResponseBody
     public ResponseEntity<?> getProfile(@ModelAttribute CallerID callerId){
         logger.info("In api controller before"+callerId.toString());
-        if(callerId.getCountryCode().equals("%2B91")){
+        if(callerId.getCountryCode().startsWith("%2B")){
             callerId.setCountryCode(callerId.getCountryCode().replace("%2B","+"));
         }
         logger.info("In api controller after"+callerId.toString());

@@ -102,7 +102,7 @@ public class CompanyController {
     public ResponseEntity<?> addCompany(@RequestBody Company companyDetails) {
         Optional<Company> existingCompany = companyRepository.findByName(companyDetails.getName());
         if (existingCompany.isPresent()) {
-            return ResponseEntity.badRequest().body("Company already exists!");
+            return ResponseEntity.status(HttpStatus.FOUND).body("Company already exists!");
         }
         String url = "http://localhost:8083/profile/getProfile?countryCode="
                 +URLEncoder.encode(companyDetails.getOwner().getCountryCode(),StandardCharsets.UTF_8)+"&number="+companyDetails.getOwner().getNumber();
@@ -111,33 +111,19 @@ public class CompanyController {
         try {
             // Make the API call
             ResponseEntity<Object> response = restTemplate.getForEntity(url, Object.class);
-
+            logger.info("response : "+String.valueOf(response));
             // Initialize the ObjectMapper to map JSON dynamically
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.valueToTree(response.getBody());
-
             // Check if the response structure matches Profile or ErrorResponse
-            if (jsonNode.has("id") && jsonNode.has("phoneNumber")) {
                 // Map response to Profile
-                Profile profile = mapper.treeToValue(jsonNode, Profile.class);
-                logger.info("Received Profile response: " + profile);
-
-                if (profile.isVerified()) {
-                    return ResponseEntity.ok(companyRepository.save(companyDetails));
-                } else {
-                    return ResponseEntity.badRequest().body("Please get your profile with number -> "
-                            + companyDetails.getOwner().getCountryCode() + " " + companyDetails.getOwner().getNumber() + " verified");
-                }
-            } else if (jsonNode.has("timestamp") && jsonNode.has("message")) {
-                // Map response to ErrorResponse
-                ErrorResponse errorResponse = mapper.treeToValue(jsonNode, ErrorResponse.class);
-                logger.info("Received ErrorResponse: " + errorResponse);
-
-                return ResponseEntity.badRequest().body("Please register your profile with provided phone number");
+            Profile profile = mapper.treeToValue(jsonNode, Profile.class);
+            logger.info("Received Profile response: " + profile);
+            if (profile.isVerified()) {
+                return ResponseEntity.ok(companyRepository.save(companyDetails));
             } else {
-                // Unexpected response structure
-                logger.info("Unexpected response structure: " + jsonNode);
-                return ResponseEntity.internalServerError().body("Unexpected response type");
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Please get your profile with number -> "
+                + companyDetails.getOwner().getCountryCode() + " " + companyDetails.getOwner().getNumber() + " verified");
             }
         } catch (RestClientException e) {
             // Handle any REST client exceptions
