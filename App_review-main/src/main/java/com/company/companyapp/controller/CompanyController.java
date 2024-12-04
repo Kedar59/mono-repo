@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/company")
@@ -37,14 +39,25 @@ public class CompanyController {
 
     @Autowired
     private ReviewRepository reviewRepository;
+
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
+
     private final Logger logger = LoggerFactory.getLogger(CompanyController.class);
+
     // Endpoint to fetch all company names
     @GetMapping("/allNames")
     public ResponseEntity<List<String>> getAllCompanyNames() {
-        List<String> companyNames = companyService.getAllCompanyNames();
-        return ResponseEntity.ok(companyNames);
+        try {
+            List<String> companyNames = companyService.getAllCompanyNames(); // Using service layer
+            return ResponseEntity.ok(companyNames);
+        } catch (Exception e) {
+            logger.error("Error fetching company names", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // Endpoint to receive a review for a company
@@ -53,7 +66,7 @@ public class CompanyController {
         String companyName = reviewDetails.get("companyName");
         String review = reviewDetails.get("review");
         String reviewer = reviewDetails.get("reviewer");
-        String phoneNumber = reviewDetails.get("phoneNumber");
+        String phoneNumber = reviewDetails.get("phoneNumber");  // This should now be passed from CallerID
         int rating = Integer.parseInt(reviewDetails.get("rating"));
 
         Optional<Company> optionalCompany = companyRepository.findByName(companyName);
@@ -105,25 +118,25 @@ public class CompanyController {
             return ResponseEntity.status(HttpStatus.FOUND).body("Company already exists!");
         }
         String url = "http://localhost:8083/profile/getProfile?countryCode="
-                +URLEncoder.encode(companyDetails.getOwner().getCountryCode(),StandardCharsets.UTF_8)+"&number="+companyDetails.getOwner().getNumber();
+                + URLEncoder.encode(companyDetails.getOwner().getCountryCode(), StandardCharsets.UTF_8)
+                + "&number=" + companyDetails.getOwner().getNumber();
 
-        logger.info("url -> "+url);
+        logger.info("url -> " + url);
         try {
             // Make the API call
             ResponseEntity<Object> response = restTemplate.getForEntity(url, Object.class);
-            logger.info("response : "+String.valueOf(response));
+            logger.info("response : " + response);
             // Initialize the ObjectMapper to map JSON dynamically
             ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.valueToTree(response.getBody());
-            // Check if the response structure matches Profile or ErrorResponse
-                // Map response to Profile
+            // Map response to Profile
             Profile profile = mapper.treeToValue(jsonNode, Profile.class);
             logger.info("Received Profile response: " + profile);
             if (profile.isVerified()) {
                 return ResponseEntity.ok(companyRepository.save(companyDetails));
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Please get your profile with number -> "
-                + companyDetails.getOwner().getCountryCode() + " " + companyDetails.getOwner().getNumber() + " verified");
+                        + companyDetails.getOwner().getCountryCode() + " " + companyDetails.getOwner().getNumber() + " verified");
             }
         } catch (RestClientException e) {
             // Handle any REST client exceptions
@@ -133,6 +146,4 @@ public class CompanyController {
             throw new RuntimeException(e);
         }
     }
-
-
 }

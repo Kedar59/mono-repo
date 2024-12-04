@@ -1,5 +1,6 @@
 package com.company.companyapp.controller;
 
+import com.company.companyapp.DTO.CallerID;
 import com.company.companyapp.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -20,39 +21,6 @@ public class UserController {
 
     @Autowired
     private RestTemplate restTemplate;
-
-    @PostMapping("/sendPhoneNumber")
-    public ResponseEntity<String> sendPhoneNumberToCompany(@RequestParam String phoneNumber) {
-        try {
-            if (phoneNumber == null || phoneNumber.isEmpty()) {
-                return ResponseEntity.badRequest().body("Phone number cannot be empty.");
-            }
-
-            // Check if the phone number is a 10-digit numeric string
-            if (!phoneNumber.matches("\\d{10}")) {
-                return ResponseEntity.badRequest().body("Invalid phone number format. Please enter a 10-digit phone number.");
-            }
-
-            String otp = userService.generateAndSendOtp(phoneNumber);
-            return ResponseEntity.ok("OTP sent to Telegram.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error sending OTP: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/verifyOtp")
-    public ResponseEntity<String> verifyOtp(@RequestParam String phoneNumber, @RequestParam String otp) {
-        try {
-            boolean isVerified = userService.verifyOtp(phoneNumber, otp);
-            if (isVerified) {
-                return ResponseEntity.ok("OTP verification successful.");
-            } else {
-                return ResponseEntity.badRequest().body("Invalid OTP or user not found.");
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error verifying OTP: " + e.getMessage());
-        }
-    }
 
     @GetMapping("/companyMenu")
     public ResponseEntity<String> companyMenu() {
@@ -78,11 +46,11 @@ public class UserController {
     public ResponseEntity<String> reviewCompany(@RequestParam(value = "companyName") String companyName,
                                                 @RequestParam(value = "review") String review,
                                                 @RequestParam(value = "reviewer") String reviewer,
-                                                @RequestParam(value = "phoneNumber") String phoneNumber,
+                                                @RequestBody CallerID callerID,  // Using CallerID instead of phoneNumber
                                                 @RequestParam(value = "rating") int rating) {
         try {
             // Ensure the user is verified and matches the last verified phone number
-            if (!userService.isUserVerified(phoneNumber) || !phoneNumber.equals(userService.getLastVerifiedPhoneNumber())) {
+            if (!userService.isUserVerified(callerID.getNumber()) || !callerID.getNumber().equals(userService.getLastVerifiedPhoneNumber())) {
                 return ResponseEntity.badRequest().body("User not verified or phone number does not match the last verified number.");
             }
 
@@ -95,7 +63,7 @@ public class UserController {
             reviewDetails.put("companyName", companyName);
             reviewDetails.put("review", review);
             reviewDetails.put("reviewer", reviewer);
-            reviewDetails.put("phoneNumber", phoneNumber);
+            reviewDetails.put("phoneNumber", callerID.getNumber());  // Now using number from CallerID
             reviewDetails.put("rating", String.valueOf(rating));
 
             HttpHeaders headers = new HttpHeaders();
