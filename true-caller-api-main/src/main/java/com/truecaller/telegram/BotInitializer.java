@@ -36,7 +36,7 @@ public class BotInitializer {
         logger.info("Initializing bot with webhookPath: {}", webhookPath);
         logger.info("Bot username: {}", botUsername);
         try {
-            WebhookBot webhookBot = new WebhookBot();
+            WebhookBot webhookBot = new WebhookBot(botToken);
             webhookBot.setBotUsername(botUsername);
             webhookBot.setBotToken(botToken);
             webhookBot.setBotPath(webhookPath);
