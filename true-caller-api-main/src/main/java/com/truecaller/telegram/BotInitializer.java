@@ -58,7 +58,7 @@ public class BotInitializer {
         for(CompanyBot bot : listBots){
             try {
                 WebhookBot webhookBot = applicationContext.getBean(WebhookBot.class, bot.getBotToken());
-                webhookBot.setBotUsername(bot.getBotUsername());
+                webhookBot.setBotUsername(bot.getCompanyName());
                 webhookBot.setBotToken(bot.getBotToken());
                 webhookBot.setBotPath(webhookPath+"/"+bot.getCompanyName());
 //                webhookBot.setWebhook(SetWebhook.builder().url(webhookBot.getBotPath()).build());
