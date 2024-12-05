@@ -25,13 +25,13 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-@Component
+
 public class WebhookBot extends TelegramWebhookBot {
 
-    @Autowired
-    private ProfileService profileService;
-    @Autowired
-    private OtpService otpService;
+
+    private final ProfileService profileService;
+
+    private final OtpService otpService;
     private String botUsername;
     private String botToken;
     private String botPath;
@@ -58,11 +58,15 @@ public class WebhookBot extends TelegramWebhookBot {
         this.botPath = botPath;
     }
 
-    public WebhookBot(){}
-    public WebhookBot(String BOT_TOKEN){
-        super(  BOT_TOKEN);
+//    public WebhookBot(String BOT_TOKEN){
+//        super(BOT_TOKEN);
+//
+//    }
+    public WebhookBot(String botToken, ProfileService profileService, OtpService otpService) {
+        super(botToken);
+        this.profileService = profileService;
+        this.otpService = otpService;
     }
-
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
         Message msg = update.getMessage();
@@ -98,6 +102,8 @@ public class WebhookBot extends TelegramWebhookBot {
         } else if(msg.isCommand()){
             if(msg.getText().equals("/requestotp")){
                 replyMessageToUser = requestPhoneNumber(id);
+            } else if (msg.getText().equals("/review")){
+                replyMessageToUser = sendText(id,"Whats your review ? ");
             }
         } else {
             replyMessageToUser = sendText(id,"Invalid request / message");

@@ -21,11 +21,17 @@ public class OtpService {
     private static final long OTP_EXPIRATION_MILLIS = OTP_EXPIRATION_MINUTES * 60 * 1000;
 
     //generate OTP
+//    public String generateOtp(){
+//        int otp = (int)(Math.random()*1000000);
+//        String otpS = String.format("%6d",otp);
+//        if(otpS.length()==5) otpS+="0";
+//        return otpS;
+//    }
+//
+
     public String generateOtp(){
-        int otp = (int)(Math.random()*1000000);
-        String otpS = String.format("%6d",otp);
-        if(otpS.length()==5) otpS+="0";
-        return otpS;
+        int otp = 100000 + (int) (Math.random() * 900000); // Ensures a random number between 100000 and 999999
+        return String.valueOf(otp); // Converts the number directly to a string
     }
     // send otp
     public String sendToTelegram(String mobileNumber){

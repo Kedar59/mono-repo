@@ -1,29 +1,51 @@
 package com.truecaller.controllers;
 
+import com.truecaller.telegram.BotInitializer;
 import com.truecaller.telegram.WebhookBot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.util.HashMap;
+
 @RestController
 public class WebhookBotController {
-    private final WebhookBot webHookBot;
+//    private final WebhookBot webHookBot;
     private Logger logger = LoggerFactory.getLogger(WebhookBotController.class);
 
-    @Autowired
-    public WebhookBotController(WebhookBot siparisVerBot){
-        this.webHookBot=siparisVerBot;
-    }
+//    @Autowired
+//    public WebhookBotController(){
+//
+//    }
 
-    @RequestMapping(value = "/", method = RequestMethod.POST)
-    public BotApiMethod<?> onUpdateReceived(@RequestBody Update update){
-        logger.info("Update received. Id: {}", update.getUpdateId());
-        return webHookBot.onWebhookUpdateReceived(update);
+
+    @PostMapping("/{companyName}")
+    public BotApiMethod<?> onUpdateReceived(@PathVariable String companyName,@RequestBody Update update){
+//        logger.info("Update received. Id: {}", update.getUpdateId());
+//        return webHookBot.onWebhookUpdateReceived(update);
+        WebhookBot webhookBot = BotInitializer.botRegistry.get(companyName);
+        logger.info(BotInitializer.botRegistry.toString());
+        // Check if the bot exists
+        if (webhookBot == null) {
+            logger.error("No bot found for company: {}", companyName);
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Bot not found for company: " + companyName
+            );
+        }
+
+        // Delegate the update to the appropriate bot
+        try {
+            return webhookBot.onWebhookUpdateReceived(update);
+        } catch (Exception e) {
+            logger.error("Error processing update for company: {}", companyName, e);
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Failed to process update"
+            );
+        }
     }
 }

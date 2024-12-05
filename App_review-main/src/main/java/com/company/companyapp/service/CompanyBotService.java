@@ -7,6 +7,7 @@ import com.company.companyapp.repository.CompanyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,15 +19,13 @@ public class CompanyBotService {
     @Autowired
     private CompanyBotRepository companyBotRepository;
 
-    public CompanyBot createCompanyBot(String companyName, String botToken, String botUrl) {
-        // Fetch the company by name
-        Optional<Company> companyOptional = companyRepository.findByName(companyName);
-        if (companyOptional.isPresent()) {
-            Company company = companyOptional.get();
-            CompanyBot companyBot = new CompanyBot(company, botToken, botUrl);
-            return companyBotRepository.save(companyBot);
-        } else {
-            throw new IllegalArgumentException("Company with name " + companyName + " does not exist.");
-        }
+    public CompanyBot createCompanyBot(CompanyBot companyBot) {
+        return companyBotRepository.save(companyBot);
+    }
+    public Optional<CompanyBot> getCompanyBotByName(String companyName){
+        return companyBotRepository.findByCompanyName(companyName);
+    }
+    public List<CompanyBot> getAllBots(){
+        return companyBotRepository.findAll();
     }
 }

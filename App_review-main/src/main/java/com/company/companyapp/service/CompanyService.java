@@ -9,5 +9,5 @@ public interface CompanyService {
 
     List<String> getAllCompanyNames();
 
-
+    Optional<Company> getCompanyByName(String companyName);
 }

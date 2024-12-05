@@ -7,6 +7,7 @@ spring:
     mongodb:
       uri: mongodb+srv://kedar:${mongodb.password}@true-caller-api-test.hdcue.mongodb.net/
       database: trueCallerDB
+#      uri: mongodb://localhost:27017/
 spring-doc:
   api-docs:
     groups:

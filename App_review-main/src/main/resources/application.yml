@@ -5,7 +5,8 @@ spring:
     name=companyapp
   data:
     mongodb:
-      uri: mongodb+srv://kedar:${mongodb.password}@true-caller-api-test.hdcue.mongodb.net/
+#      uri: mongodb+srv://kedar:${mongodb.password}@true-caller-api-test.hdcue.mongodb.net/
+      uri: mongodb://localhost:27017/
       database: trueCallerDB
 spring-doc:
   api-docs:
