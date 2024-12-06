@@ -25,7 +25,6 @@ public class Config {
     }
     @Autowired
     private ProfileService profileService;
-
     @Autowired
     private OtpService otpService;
 

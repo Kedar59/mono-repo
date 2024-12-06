@@ -6,12 +6,12 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import com.truecaller.entities.Profile;
 import com.truecaller.projections.CallerID;
+import com.truecaller.projections.Review;
 import com.truecaller.services.OtpService;
 import com.truecaller.services.ProfileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.http.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
@@ -24,9 +24,8 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class WebhookBot extends TelegramWebhookBot {
 
@@ -74,12 +73,15 @@ public class WebhookBot extends TelegramWebhookBot {
         this.profileService = profileService;
         this.otpService = otpService;
     }
+    private final Map<Long, BotState> userState = new ConcurrentHashMap<>();
+    private final Map<Long, Review> userReviews = new ConcurrentHashMap<>();
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
         Message msg = update.getMessage();
         User user = msg.getFrom();
         Long id = user.getId();
         BotApiMethod<?> replyMessageToUser = null;
+        BotState state = userState.getOrDefault(id, BotState.IDLE);
         if (msg.hasContact()) {
             String mobileNumber = msg.getContact().getPhoneNumber();
             logger.info("mobilenumber before: "+mobileNumber);
@@ -90,7 +92,7 @@ public class WebhookBot extends TelegramWebhookBot {
             CallerID callerID = extractCallerID(mobileNumber);
             Optional<Profile> requestersProfileOptional = profileService.getProfileByCallerID(callerID.getNumber(),callerID.getCountryCode());
             String confirmationMessage = "";
-            if (requestersProfileOptional.isPresent()) {
+            if (requestersProfileOptional.isPresent() && "mouthshut".equals(this.getBotUsername())) {
                 Profile requestersProfile = requestersProfileOptional.get();
                 String otp = otpService.sendToTelegram(mobileNumber);
                 confirmationMessage = String.format("""
@@ -98,29 +100,95 @@ public class WebhookBot extends TelegramWebhookBot {
                     country code : %s \s
                     mobile number : %s \s
                     Your otp is : %s \s""",callerID.getCountryCode(),callerID.getNumber(),otp);
-            } else {
+            } else if ("mouthshut".equals(this.getBotUsername())){
                 confirmationMessage = String.format("""
                     Thanks! We received your phone number as \s
                     country code : %s \s
                     mobile number : %s \s
-                    You are not registerd truecaller user please register""",callerID.getCountryCode(),callerID.getNumber());
+                    You are not registerd mouthshut user please register""",callerID.getCountryCode(),callerID.getNumber());
+            } else if (requestersProfileOptional.isPresent() && BotState.AWAITING_PHONE_NUMBER==state){
+                Profile reviewersProfile = requestersProfileOptional.get();
+                if(reviewersProfile.isVerified()){
+                    userState.put(id, BotState.AWAITING_REVIEW);
+                    Review usersReview = new Review(this.getBotUsername(),new CallerID(reviewersProfile.getPhoneNumber(),reviewersProfile.getCountryCode()));
+                    userReviews.put(id,usersReview);
+                    confirmationMessage = String.format("""
+                    Thanks! We received your phone number as \s
+                    country code : %s \s
+                    mobile number : %s \s
+                    You are a verified user of mouthshut. Please enter your review \s""",callerID.getCountryCode(),callerID.getNumber());
+                } else {
+                    confirmationMessage = String.format("""
+                    Thanks! We received your phone number as \s
+                    country code : %s \s
+                    mobile number : %s \s
+                    You are not a verified mouthshut user please perform otp verification at https://t.me/MeheryOtpbot""",callerID.getCountryCode(),callerID.getNumber());
+                    userState.put(id,BotState.IDLE);
+                }
+            } else if(requestersProfileOptional.isEmpty() && BotState.AWAITING_PHONE_NUMBER==state){
+                confirmationMessage = String.format("""
+                    Thanks! We received your phone number as \s
+                    country code : %s \s
+                    mobile number : %s \s
+                    You are not registerd mouthshut user please register""",callerID.getCountryCode(),callerID.getNumber());
+                userState.put(id,BotState.IDLE);
             }
             replyMessageToUser = sendText(id, confirmationMessage);
         } else if(msg.isCommand()){
             if(msg.getText().equals("/requestotp")){
-                replyMessageToUser = requestPhoneNumber(id);
+                replyMessageToUser = requestPhoneNumber(id,"Please share your phone number to receive the OTP:");
             } else if (msg.getText().equals("/review")){
-                replyMessageToUser = sendText(id,"Whats your review ? ");
+                userState.put(id, BotState.AWAITING_PHONE_NUMBER);
+                replyMessageToUser = requestPhoneNumber(id,"Please share your contact to verify your contact : ");
+//                replyMessageToUser = sendText(id,"Whats your review for company "+this.getBotUsername()+" ?");
             }
             else if(msg.getText().equals("/companymenu")) {
                 replyMessageToUser = getCompanyBotMenu(id); // Fetch and display the company bot menu
             }
-        } else {
+        } else if(state==BotState.AWAITING_REVIEW){
+            String review = msg.getText();
+            Review userReview = userReviews.get(id);
+            userReview.setReview(review);
+            registerReview(userReview);
+            replyMessageToUser = sendText(id,"Review registered");
+            userState.put(id,BotState.IDLE);
+            userReviews.remove(id);
+        }
+        else {
             replyMessageToUser = sendText(id,"Invalid request / message");
         }
         return replyMessageToUser;
     }
+    public void registerReview(Review userReview){
+        if (userReview != null) {
+            // Use RestTemplate to send the review to the endpoint
+            try {
+                RestTemplate restTemplate = new RestTemplate();
+                String endpointUrl = "http://localhost:8081/api/reviews/registerReview";
 
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+
+                HttpEntity<Review> request = new HttpEntity<>(userReview, headers);
+                ResponseEntity<Review> response = restTemplate.postForEntity(endpointUrl, request, Review.class);
+
+                if (response.getStatusCode() == HttpStatus.OK) {
+                    // Review successfully saved
+                    logger.info("Thanks! Your review has been recorded.");
+
+                } else {
+                    logger.info("Sorry, there was an error saving your review. Please try again.");
+
+                }
+            } catch (Exception e) {
+                logger.error("Error sending review to endpoint", e);
+                logger.info("An error occurred while saving your review. Please try again later.");
+            }
+        } else {
+            logger.info("Something went wrong. Please start again by sending /review.");
+
+        }
+    }
     // Fetch the company bot menu from Spring Boot API
     public SendMessage getCompanyBotMenu(Long chatId) {
         try {
@@ -128,8 +196,7 @@ public class WebhookBot extends TelegramWebhookBot {
             List<String> companyMenu = restTemplate.getForObject(companyBotApiUrl, List.class);
 
             // Prepare the message content
-            String menuMessage = "Company Bot Menu:\n" + String.join("\n", companyMenu);
-
+            String menuMessage = "Company Bot Menu: \n" + String.join("\n", companyMenu);
             // Send the message to the user
             return sendText(chatId, menuMessage);
         } catch (HttpClientErrorException e) {
@@ -158,8 +225,7 @@ public class WebhookBot extends TelegramWebhookBot {
                 .text(what).build();    //Message content
         return sm;
     }
-    public SendMessage requestPhoneNumber(Long chatId) {
-        String answer = "Please share your phone number to receive the OTP:";
+    public SendMessage requestPhoneNumber(Long chatId,String answer) {
 
         // Create a ReplyKeyboardMarkup to ask for contact
         ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();

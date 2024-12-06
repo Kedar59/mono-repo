@@ -1,15 +1,14 @@
-package com.company.companyapp.model;
+package com.truecaller.projections;
 
-import com.company.companyapp.DTO.CallerID;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
-@Document(collection = "reviews")
+//@Document(collection = "reviews")
 public class Review {
 
-    @Id
+//    @Id
     private String id;
     private String companyName;  // Link to the company
     private CallerID reviewer;
@@ -27,7 +26,11 @@ public class Review {
         this.review = review;
         this.rating = rating;
     }
-
+    public Review(String companyName,CallerID reviewer){
+        this.companyName = companyName;
+        this.reviewer = reviewer;
+        this.rating = 3;
+    }
     public Review(String id, String companyName, CallerID reviewer, String review, float rating, Date timestamp) {
         this.id = id;
         this.companyName = companyName;
@@ -85,3 +88,4 @@ public class Review {
         this.rating = rating;
     }
 }
+

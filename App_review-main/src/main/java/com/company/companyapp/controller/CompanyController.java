@@ -61,54 +61,54 @@ public class CompanyController {
     }
 
     // Endpoint to receive a review for a company
-    @PostMapping("/receiveReview")
-    public ResponseEntity<String> receiveReview(@RequestBody Map<String, String> reviewDetails) {
-        String companyName = reviewDetails.get("companyName");
-        String review = reviewDetails.get("review");
-        String reviewer = reviewDetails.get("reviewer");
-        String phoneNumber = reviewDetails.get("phoneNumber");  // This should now be passed from CallerID
-        int rating = Integer.parseInt(reviewDetails.get("rating"));
+//    @PostMapping("/receiveReview")
+//    public ResponseEntity<String> receiveReview(@RequestBody Map<String, String> reviewDetails) {
+//        String companyName = reviewDetails.get("companyName");
+//        String review = reviewDetails.get("review");
+//        String reviewer = reviewDetails.get("reviewer");
+//        String phoneNumber = reviewDetails.get("phoneNumber");  // This should now be passed from CallerID
+//        int rating = Integer.parseInt(reviewDetails.get("rating"));
+//
+//        Optional<Company> optionalCompany = companyRepository.findByName(companyName);
+//        if (optionalCompany.isPresent()) {
+//            Company company = optionalCompany.get();
+//            String companyId = company.getId();
+//
+//            // Create and save the review
+//            Review newReview = new Review(companyId, reviewer, phoneNumber, review, rating);
+//            reviewRepository.save(newReview);
+//
+//            // Update the company's average rating
+//            updateCompanyRating(companyId);
+//
+//            return ResponseEntity.ok("Review added successfully!");
+//        } else {
+//            return ResponseEntity.badRequest().body("Company not found");
+//        }
+//    }
 
-        Optional<Company> optionalCompany = companyRepository.findByName(companyName);
-        if (optionalCompany.isPresent()) {
-            Company company = optionalCompany.get();
-            String companyId = company.getId();
+//    private void updateCompanyRating(String companyId) {
+//        List<Review> reviews = reviewRepository.findByCompanyId(companyId);
+//        double newAverageRating = reviews.stream()
+//                .mapToInt(Review::getRating)
+//                .average()
+//                .orElse(0.0);
+//
+//        Company company = companyRepository.findById(companyId).orElseThrow();
+//        company.setRating(newAverageRating);
+//        companyRepository.save(company);
+//    }
 
-            // Create and save the review
-            Review newReview = new Review(companyId, reviewer, phoneNumber, review, rating);
-            reviewRepository.save(newReview);
-
-            // Update the company's average rating
-            updateCompanyRating(companyId);
-
-            return ResponseEntity.ok("Review added successfully!");
-        } else {
-            return ResponseEntity.badRequest().body("Company not found");
-        }
-    }
-
-    private void updateCompanyRating(String companyId) {
-        List<Review> reviews = reviewRepository.findByCompanyId(companyId);
-        double newAverageRating = reviews.stream()
-                .mapToInt(Review::getRating)
-                .average()
-                .orElse(0.0);
-
-        Company company = companyRepository.findById(companyId).orElseThrow();
-        company.setRating(newAverageRating);
-        companyRepository.save(company);
-    }
-
-    @GetMapping("/{companyId}/reviews")
-    public ResponseEntity<List<Review>> getReviewsByCompany(@PathVariable String companyId) {
-        List<Review> reviews = reviewRepository.findByCompanyId(companyId);
-
-        if (reviews.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-
-        return ResponseEntity.ok(reviews);
-    }
+//    @GetMapping("/{companyId}/reviews")
+//    public ResponseEntity<List<Review>> getReviewsByCompany(@PathVariable String companyId) {
+//        List<Review> reviews = reviewRepository.findByCompanyId(companyId);
+//
+//        if (reviews.isEmpty()) {
+//            return ResponseEntity.noContent().build();
+//        }
+//
+//        return ResponseEntity.ok(reviews);
+//    }
 
     // Modified addCompany endpoint to prevent duplicate companies
     @PostMapping("/addCompany")
