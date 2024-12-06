@@ -6,6 +6,10 @@ spring:
   data:
     mongodb:
       uri: mongodb+srv://kedar:${mongodb.password}@true-caller-api-test.hdcue.mongodb.net/
+<<<<<<< Updated upstream
+=======
+#      uri: mongodb://localhost:27017/
+>>>>>>> Stashed changes
       database: trueCallerDB
 spring-doc:
   api-docs:
