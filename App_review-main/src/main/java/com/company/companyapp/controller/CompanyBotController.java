@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/companyBot")
@@ -36,4 +37,16 @@ public class CompanyBotController {
         return ResponseEntity.ok(companyBotService.getAllBots());
     }
 
+    @GetMapping("/companyBotMenu")
+    public ResponseEntity<List<String>> getCompanyMenu() {
+        // Retrieve all bots
+        List<CompanyBot> bots = companyBotService.getAllBots();
+
+        // Map company names and bot URLs to the required format
+        List<String> menu = bots.stream()
+                .map(bot -> bot.getCompanyName() + ": " + bot.getBotUrl())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(menu);
+    }
 }

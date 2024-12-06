@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.TelegramWebhookBot;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -36,6 +38,11 @@ public class WebhookBot extends TelegramWebhookBot {
     private String botToken;
     private String botPath;
     private Logger logger = LoggerFactory.getLogger(WebhookBot.class);
+
+    // RestTemplate to interact with Spring Boot API
+    private RestTemplate restTemplate = new RestTemplate();
+    private String companyBotApiUrl = "http://localhost:8081/api/companyBot/companyBotMenu";
+
     @Override
     public String getBotPath() {
         return botPath;
@@ -105,10 +112,31 @@ public class WebhookBot extends TelegramWebhookBot {
             } else if (msg.getText().equals("/review")){
                 replyMessageToUser = sendText(id,"Whats your review ? ");
             }
+            else if(msg.getText().equals("/companymenu")) {
+                replyMessageToUser = getCompanyBotMenu(id); // Fetch and display the company bot menu
+            }
         } else {
             replyMessageToUser = sendText(id,"Invalid request / message");
         }
         return replyMessageToUser;
+    }
+
+    // Fetch the company bot menu from Spring Boot API
+    public SendMessage getCompanyBotMenu(Long chatId) {
+        try {
+            // Fetch the company bot menu from the Spring Boot backend
+            List<String> companyMenu = restTemplate.getForObject(companyBotApiUrl, List.class);
+
+            // Prepare the message content
+            String menuMessage = "Company Bot Menu:\n" + String.join("\n", companyMenu);
+
+            // Send the message to the user
+            return sendText(chatId, menuMessage);
+        } catch (HttpClientErrorException e) {
+            logger.error("Error fetching company bot menu: {}", e.getMessage());
+            return sendText(chatId, "Sorry, we couldn't fetch the company bot menu right now.");
+
+        }
     }
     public CallerID extractCallerID(String numberStr){
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
