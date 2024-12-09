@@ -31,6 +31,9 @@ public class Review {
         this.reviewer = reviewer;
         this.rating = 3;
     }
+    public Review(String companyName){
+        this.companyName = companyName;
+    }
     public Review(String id, String companyName, CallerID reviewer, String review, float rating, Date timestamp) {
         this.id = id;
         this.companyName = companyName;

@@ -5,10 +5,12 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import com.truecaller.entities.Profile;
+import com.truecaller.entities.ReviewBotState;
 import com.truecaller.projections.CallerID;
 import com.truecaller.projections.Review;
 import com.truecaller.services.OtpService;
 import com.truecaller.services.ProfileService;
+import com.truecaller.services.ReviewBotStateService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
@@ -33,6 +35,7 @@ public class WebhookBot extends TelegramWebhookBot {
     private final ProfileService profileService;
 
     private final OtpService otpService;
+    private final ReviewBotStateService reviewBotStateService;
     private String botUsername;
     private String botToken;
     private String botPath;
@@ -64,24 +67,23 @@ public class WebhookBot extends TelegramWebhookBot {
         this.botPath = botPath;
     }
 
-//    public WebhookBot(String BOT_TOKEN){
-//        super(BOT_TOKEN);
-//
-//    }
-    public WebhookBot(String botToken, ProfileService profileService, OtpService otpService) {
+
+    public WebhookBot(String botToken, ReviewBotStateService reviewBotStateService,
+                      ProfileService profileService, OtpService otpService) {
         super(botToken);
         this.profileService = profileService;
         this.otpService = otpService;
+        this.reviewBotStateService = reviewBotStateService;
     }
-    private final Map<Long, BotState> userState = new ConcurrentHashMap<>();
-    private final Map<Long, Review> userReviews = new ConcurrentHashMap<>();
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
         Message msg = update.getMessage();
         User user = msg.getFrom();
         Long id = user.getId();
         BotApiMethod<?> replyMessageToUser = null;
-        BotState state = userState.getOrDefault(id, BotState.IDLE);
+        ReviewBotState reviewBotState = reviewBotStateService.getBotState(this.getBotUsername(),id);
+        BotState state = reviewBotState.getState();
+        Review usersReview = reviewBotState.getReview();
         if (msg.hasContact()) {
             String mobileNumber = msg.getContact().getPhoneNumber();
             logger.info("mobilenumber before: "+mobileNumber);
@@ -109,9 +111,9 @@ public class WebhookBot extends TelegramWebhookBot {
             } else if (requestersProfileOptional.isPresent() && BotState.AWAITING_PHONE_NUMBER==state){
                 Profile reviewersProfile = requestersProfileOptional.get();
                 if(reviewersProfile.isVerified()){
-                    userState.put(id, BotState.AWAITING_REVIEW);
-                    Review usersReview = new Review(this.getBotUsername(),new CallerID(reviewersProfile.getPhoneNumber(),reviewersProfile.getCountryCode()));
-                    userReviews.put(id,usersReview);
+                    usersReview.setReviewer(new CallerID(reviewersProfile.getPhoneNumber(),reviewersProfile.getCountryCode()));
+                    state = BotState.AWAITING_REVIEW;
+                    reviewBotStateService.saveOrUpdateBotState(this.getBotUsername(),id,state,usersReview);
                     confirmationMessage = String.format("""
                     Thanks! We received your phone number as \s
                     country code : %s \s
@@ -123,7 +125,7 @@ public class WebhookBot extends TelegramWebhookBot {
                     country code : %s \s
                     mobile number : %s \s
                     You are not a verified mouthshut user please perform otp verification at https://t.me/MeheryOtpbot""",callerID.getCountryCode(),callerID.getNumber());
-                    userState.put(id,BotState.IDLE);
+                    reviewBotStateService.deleteBotState(this.getBotUsername(),id);
                 }
             } else if(requestersProfileOptional.isEmpty() && BotState.AWAITING_PHONE_NUMBER==state){
                 confirmationMessage = String.format("""
@@ -131,30 +133,38 @@ public class WebhookBot extends TelegramWebhookBot {
                     country code : %s \s
                     mobile number : %s \s
                     You are not registerd mouthshut user please register""",callerID.getCountryCode(),callerID.getNumber());
-                userState.put(id,BotState.IDLE);
+                reviewBotStateService.deleteBotState(this.getBotUsername(),id);
             }
             replyMessageToUser = sendText(id, confirmationMessage);
         } else if(msg.isCommand()){
             if(msg.getText().equals("/requestotp")){
                 replyMessageToUser = requestPhoneNumber(id,"Please share your phone number to receive the OTP:");
             } else if (msg.getText().equals("/review")){
-                userState.put(id, BotState.AWAITING_PHONE_NUMBER);
+                reviewBotStateService.saveOrUpdateBotState(this.getBotUsername(),id,BotState.AWAITING_PHONE_NUMBER,new Review(this.getBotUsername()));
                 replyMessageToUser = requestPhoneNumber(id,"Please share your contact to verify your contact : ");
-//                replyMessageToUser = sendText(id,"Whats your review for company "+this.getBotUsername()+" ?");
             }
             else if(msg.getText().equals("/companymenu")) {
                 replyMessageToUser = getCompanyBotMenu(id); // Fetch and display the company bot menu
             }
         } else if(state==BotState.AWAITING_REVIEW){
             String review = msg.getText();
-            Review userReview = userReviews.get(id);
-            userReview.setReview(review);
-            registerReview(userReview);
-            replyMessageToUser = sendText(id,"Review registered");
-            userState.put(id,BotState.IDLE);
-            userReviews.remove(id);
-        }
-        else {
+            usersReview.setReview(review);
+            replyMessageToUser = sendText(id,"Enter a rating between 1 and 5 :");
+            reviewBotStateService.saveOrUpdateBotState(this.getBotUsername(),id,BotState.AWAITING_RATING,usersReview);
+        } else if (state==BotState.AWAITING_RATING) {
+            String userInput = msg.getText();
+            if (userInput.matches("^[1-5](\\.\\d{1,2})?$")) {
+                float rating = Float.parseFloat(userInput);
+                // Process the rating
+                usersReview.setRating(rating);
+                registerReview(usersReview);
+                reviewBotStateService.deleteBotState(this.getBotUsername(),id);
+                replyMessageToUser = sendText(id,"Thanks! You provided a rating of : " + rating+" .Your review has been registered.");
+            } else {
+                // Handle invalid input
+                replyMessageToUser = sendText(id,"Invalid rating. Please enter a number between 1.0 and 5.0.");
+            }
+        } else {
             replyMessageToUser = sendText(id,"Invalid request / message");
         }
         return replyMessageToUser;
