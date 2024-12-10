@@ -3,13 +3,10 @@ package com.truecaller.entities;
 
 import com.truecaller.telegram.BotState;
 import com.truecaller.projections.Review;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "bot_states")
+
 public class ReviewBotState {
 
-    @Id
     private String id; // Composite key: companyName + ":" + chatId
     private String companyName;
     private Long chatId;

@@ -90,5 +90,16 @@ public class Review {
     public void setRating(float rating) {
         this.rating = rating;
     }
+
+    @Override
+    public String toString() {
+        return "Review{" +
+                "companyName='" + companyName + '\'' +
+                ", reviewer=" + reviewer +
+                ", review='" + review + '\'' +
+                ", rating=" + rating +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }
 

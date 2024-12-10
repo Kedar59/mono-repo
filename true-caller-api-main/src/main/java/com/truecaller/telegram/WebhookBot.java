@@ -10,7 +10,7 @@ import com.truecaller.projections.CallerID;
 import com.truecaller.projections.Review;
 import com.truecaller.services.OtpService;
 import com.truecaller.services.ProfileService;
-import com.truecaller.services.ReviewBotStateService;
+import com.truecaller.services.RedisService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
@@ -27,7 +27,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class WebhookBot extends TelegramWebhookBot {
 
@@ -35,7 +34,7 @@ public class WebhookBot extends TelegramWebhookBot {
     private final ProfileService profileService;
 
     private final OtpService otpService;
-    private final ReviewBotStateService reviewBotStateService;
+    private final RedisService redisService;
     private String botUsername;
     private String botToken;
     private String botPath;
@@ -68,12 +67,12 @@ public class WebhookBot extends TelegramWebhookBot {
     }
 
 
-    public WebhookBot(String botToken, ReviewBotStateService reviewBotStateService,
+    public WebhookBot(String botToken, RedisService redisService,
                       ProfileService profileService, OtpService otpService) {
         super(botToken);
         this.profileService = profileService;
         this.otpService = otpService;
-        this.reviewBotStateService = reviewBotStateService;
+        this.redisService = redisService;
     }
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
@@ -81,7 +80,7 @@ public class WebhookBot extends TelegramWebhookBot {
         User user = msg.getFrom();
         Long id = user.getId();
         BotApiMethod<?> replyMessageToUser = null;
-        ReviewBotState reviewBotState = reviewBotStateService.getBotState(this.getBotUsername(),id);
+        ReviewBotState reviewBotState = redisService.getBotState(this.getBotUsername(),id);
         BotState state = reviewBotState.getState();
         Review usersReview = reviewBotState.getReview();
         if (msg.hasContact()) {
@@ -113,7 +112,7 @@ public class WebhookBot extends TelegramWebhookBot {
                 if(reviewersProfile.isVerified()){
                     usersReview.setReviewer(new CallerID(reviewersProfile.getPhoneNumber(),reviewersProfile.getCountryCode()));
                     state = BotState.AWAITING_REVIEW;
-                    reviewBotStateService.saveOrUpdateBotState(this.getBotUsername(),id,state,usersReview);
+                    redisService.saveOrUpdateBotState(this.getBotUsername(),id,state,usersReview);
                     confirmationMessage = String.format("""
                     Thanks! We received your phone number as \s
                     country code : %s \s
@@ -125,7 +124,7 @@ public class WebhookBot extends TelegramWebhookBot {
                     country code : %s \s
                     mobile number : %s \s
                     You are not a verified mouthshut user please perform otp verification at https://t.me/MeheryOtpbot""",callerID.getCountryCode(),callerID.getNumber());
-                    reviewBotStateService.deleteBotState(this.getBotUsername(),id);
+                    redisService.deleteBotState(this.getBotUsername(),id);
                 }
             } else if(requestersProfileOptional.isEmpty() && BotState.AWAITING_PHONE_NUMBER==state){
                 confirmationMessage = String.format("""
@@ -133,14 +132,14 @@ public class WebhookBot extends TelegramWebhookBot {
                     country code : %s \s
                     mobile number : %s \s
                     You are not registerd mouthshut user please register""",callerID.getCountryCode(),callerID.getNumber());
-                reviewBotStateService.deleteBotState(this.getBotUsername(),id);
+                redisService.deleteBotState(this.getBotUsername(),id);
             }
             replyMessageToUser = sendText(id, confirmationMessage);
         } else if(msg.isCommand()){
             if(msg.getText().equals("/requestotp")){
                 replyMessageToUser = requestPhoneNumber(id,"Please share your phone number to receive the OTP:");
             } else if (msg.getText().equals("/review")){
-                reviewBotStateService.saveOrUpdateBotState(this.getBotUsername(),id,BotState.AWAITING_PHONE_NUMBER,new Review(this.getBotUsername()));
+                redisService.saveOrUpdateBotState(this.getBotUsername(),id,BotState.AWAITING_PHONE_NUMBER,new Review(this.getBotUsername()));
                 replyMessageToUser = requestPhoneNumber(id,"Please share your contact to verify your contact : ");
             }
             else if(msg.getText().equals("/companymenu")) {
@@ -150,7 +149,7 @@ public class WebhookBot extends TelegramWebhookBot {
             String review = msg.getText();
             usersReview.setReview(review);
             replyMessageToUser = sendText(id,"Enter a rating between 1 and 5 :");
-            reviewBotStateService.saveOrUpdateBotState(this.getBotUsername(),id,BotState.AWAITING_RATING,usersReview);
+            redisService.saveOrUpdateBotState(this.getBotUsername(),id,BotState.AWAITING_RATING,usersReview);
         } else if (state==BotState.AWAITING_RATING) {
             String userInput = msg.getText();
             if (userInput.matches("^[1-5](\\.\\d{1,2})?$")) {
@@ -158,7 +157,7 @@ public class WebhookBot extends TelegramWebhookBot {
                 // Process the rating
                 usersReview.setRating(rating);
                 registerReview(usersReview);
-                reviewBotStateService.deleteBotState(this.getBotUsername(),id);
+                redisService.deleteBotState(this.getBotUsername(),id);
                 replyMessageToUser = sendText(id,"Thanks! You provided a rating of : " + rating+" .Your review has been registered.");
             } else {
                 // Handle invalid input

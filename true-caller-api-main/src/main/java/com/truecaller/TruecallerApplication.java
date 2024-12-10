@@ -1,13 +1,17 @@
 package com.truecaller;
 
 import com.truecaller.config.TwilioConfig;
+import com.truecaller.telegram.WebhookBot;
 import com.twilio.Twilio;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
@@ -18,9 +22,11 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 public class TruecallerApplication {
     @Autowired
     private TwilioConfig twilioConfig;
+    private Logger logger = LoggerFactory.getLogger(TruecallerApplication.class);
     @PostConstruct
     public void setup() throws TelegramApiException {
         Twilio.init(twilioConfig.getAccountSid(),twilioConfig.getAuthToken());
+
     }
 	public static void main(String[] args) {
         System.setProperty("spring.profiles.active", "secrets");
