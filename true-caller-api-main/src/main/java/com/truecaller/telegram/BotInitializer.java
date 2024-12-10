@@ -21,6 +21,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class BotInitializer {
@@ -56,7 +57,21 @@ public class BotInitializer {
         logger.info("list of bots : "+listBots.toString());
         botRegistry = new HashMap<String,WebhookBot>();
         for(CompanyBot bot : listBots){
+            String botWebhookUrl = webhookPath + "/" + bot.getCompanyName();
+            String baseUrl = "https://api.telegram.org/bot" + bot.getBotToken();
             try {
+                boolean isWebhookSet = setWebhook(baseUrl, botWebhookUrl);
+                if (isWebhookSet) {
+                    // Verify webhook
+                    boolean isWebhookVerified = verifyWebhook(baseUrl, botWebhookUrl);
+                    if (isWebhookVerified) {
+                        logger.info("Webhook successfully set and verified for bot: {}", bot.getCompanyName());
+                    } else {
+                        logger.warn("Webhook verification failed for bot: {}", bot.getCompanyName());
+                    }
+                } else {
+                    logger.warn("Failed to set webhook for bot: {}", bot.getCompanyName());
+                }
                 WebhookBot webhookBot = applicationContext.getBean(WebhookBot.class, bot.getBotToken());
                 webhookBot.setBotUsername(bot.getCompanyName());
                 webhookBot.setBotToken(bot.getBotToken());
@@ -71,5 +86,29 @@ public class BotInitializer {
             }
         }
 
+    }
+    private boolean setWebhook(String baseUrl, String botWebhookUrl) {
+        String setWebhookUrl = baseUrl + "/setWebhook?url=" + botWebhookUrl;
+        try {
+            Map<String, Object> response = restTemplate.getForObject(setWebhookUrl, Map.class);
+            return response != null && Boolean.TRUE.equals(response.get("ok"));
+        } catch (Exception e) {
+            logger.error("Error setting webhook at URL: {}", setWebhookUrl, e);
+            return false;
+        }
+    }
+
+    private boolean verifyWebhook(String baseUrl, String botWebhookUrl) {
+        String getWebhookInfoUrl = baseUrl + "/getWebhookInfo";
+        try {
+            Map<String, Object> response = restTemplate.getForObject(getWebhookInfoUrl, Map.class);
+            if (response != null && Boolean.TRUE.equals(response.get("ok"))) {
+                Map<String, Object> result = (Map<String, Object>) response.get("result");
+                return botWebhookUrl.equals(result.get("url"));
+            }
+        } catch (Exception e) {
+            logger.error("Error verifying webhook at URL: {}", getWebhookInfoUrl, e);
+        }
+        return false;
     }
 }
