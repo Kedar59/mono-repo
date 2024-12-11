@@ -11,11 +11,17 @@ import java.util.Date;
 
 @Document(collection="Profile")
 @CompoundIndexes({
-        @CompoundIndex(name = "phone_country_unique", def = "{'phoneNumber': 1, 'countryCode': 1}", unique = true)
+        @CompoundIndex(name = "phone_country_unique", def = "{'phoneNumber': 1, 'countryCode': 1}", unique = true),
+        @CompoundIndex(name = "email_unique", def = "{'email': 1}", unique = true)
 })
 public class Profile {
     @Id
     private String id;
+
+    @Indexed(unique = true)
+    private String email;
+
+    private String password;
 
     private String phoneNumber;
 
@@ -33,10 +39,12 @@ public class Profile {
     public Profile() {
     }
 
-    public Profile(String id, String phoneNumber, String countryCode, String name,
+    public Profile(String id, String email, String password, String phoneNumber, String countryCode, String name,
                    boolean isVerified, String location, int numberOfSpamCallReports,
                    int numberOfSpamSMSReports, Date timestamp) {
         this.id = id;
+        this.email = email;
+        this.password = password;
         this.phoneNumber = phoneNumber;
         this.countryCode = countryCode;
         this.name = name;
@@ -46,7 +54,7 @@ public class Profile {
         this.numberOfSpamSMSReports = numberOfSpamSMSReports;
         this.timestamp = timestamp;
     }
-    public Profile(String phoneNumber,String countryCode,int numberOfSpamCallReports,int numberOfSpamSMSReports){
+    public Profile(String email, String password, String phoneNumber,String countryCode,int numberOfSpamCallReports,int numberOfSpamSMSReports){
         this.phoneNumber = phoneNumber;
         this.countryCode = countryCode;
         this.numberOfSpamCallReports = numberOfSpamCallReports;
@@ -63,6 +71,14 @@ public class Profile {
     public void setId(String id) {
         this.id = id;
     }
+
+    public String getEmail() { return email; }
+
+    public void setEmail(String email) { this.email = email; }
+
+    public String getPassword() { return password; }
+
+    public void setPassword(String password) { this.password = password; }
 
     public String getPhoneNumber() {
         return phoneNumber;
