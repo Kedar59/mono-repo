@@ -1,42 +1,89 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5; /* Light background for better contrast */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+}
+
+.registration-form-container {
+  width: 100%;
+  max-width: 8000px; /* Set form width to make it visually balanced */
+  background-color: #ffffff; /* Clean white form background */
   padding: 2rem;
+  border-radius: 12px; /* Softer border radius for a modern look */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem; /* Uniform spacing between fields */
+}
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem; /* Proper spacing below title */
+  color: #333;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.form-field {
+  width: 100%; /* Input fields span full form width */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.form-label {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #666;
+  margin-bottom: 0.2rem;
+  display: block;
+  margin-top: 0.6rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 6px; /* Softer input box edges */
+  box-sizing: border-box;
+  background-color: #fdfdfd;
+  transition: border-color 0.3s;
+}
+
+.form-input:focus {
+  border-color: #646cff;
+  outline: none;
+}
+
+.submit-button {
+  width: 100%;
+  background-color: #646cff;
+  color: #fff;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+.submit-button:hover {
+  background-color: #5757d1;
+}
+
+@media (max-width: 768px) {
+  .registration-form-container {
+    padding: 1.5rem; /* Adjust padding for smaller screens */
   }
-  to {
-    transform: rotate(360deg);
+
+  .form-title {
+    font-size: 1.8rem; /* Scale down title for small devices */
   }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }
