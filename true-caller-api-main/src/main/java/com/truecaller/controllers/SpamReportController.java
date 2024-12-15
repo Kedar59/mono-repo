@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/spam")
+@RequestMapping("/truecaller_api/spam")
 public class SpamReportController {
     @Autowired
     private SpamReportService spamReportService;

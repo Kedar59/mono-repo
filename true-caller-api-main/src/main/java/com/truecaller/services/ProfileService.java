@@ -11,6 +11,7 @@ public interface ProfileService {
     Profile saveProfile(Profile profile);
 
     Optional<Profile> getProfileByPhoneNumber(String phoneNumber);
+    Optional<Profile> getProfileByEmail(String email);
     Optional<Profile> getProfileByCallerID(String number,String CountryCode);
 
     List<Profile> searchProfilesByName(String partialName);

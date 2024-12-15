@@ -27,6 +27,11 @@ public class ProfileServiceImplements implements ProfileService {
     }
 
     @Override
+    public Optional<Profile> getProfileByEmail(String email) {
+        return repository.findByEmail(email);
+    }
+
+    @Override
     public Optional<Profile> getProfileByCallerID(String number,String countryCode){
         logger.info("in profileServiceImplements number:"+number+" countryCode : "+countryCode);
         return repository.findByCallerId(number,countryCode);

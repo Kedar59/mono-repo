@@ -1,6 +1,6 @@
-package com.truecaller.repositories;
+package com.apiGateway.repositories;
 
-import com.truecaller.entities.Profile;
+import com.apiGateway.entities.Profile;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 

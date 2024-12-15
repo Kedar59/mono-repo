@@ -1,5 +1,4 @@
-package com.truecaller.entities;
-
+package com.apiGateway.entities;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;

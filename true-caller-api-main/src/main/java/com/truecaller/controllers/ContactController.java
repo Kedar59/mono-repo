@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/contact")
+@RequestMapping("/truecaller_api/contact")
 public class ContactController {
     @Autowired
     private ProfileService profileService;

@@ -12,22 +12,12 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.HashMap;
-
+@RequestMapping("/truecaller_api/webhook")
 @RestController
 public class WebhookBotController {
-//    private final WebhookBot webHookBot;
     private Logger logger = LoggerFactory.getLogger(WebhookBotController.class);
-
-//    @Autowired
-//    public WebhookBotController(){
-//
-//    }
-
-
     @PostMapping("/{companyName}")
     public BotApiMethod<?> onUpdateReceived(@PathVariable String companyName,@RequestBody Update update){
-//        logger.info("Update received. Id: {}", update.getUpdateId());
-//        return webHookBot.onWebhookUpdateReceived(update);
         WebhookBot webhookBot = BotInitializer.botRegistry.get(companyName);
         logger.info(BotInitializer.botRegistry.toString());
         // Check if the bot exists
@@ -37,7 +27,6 @@ public class WebhookBotController {
                     HttpStatus.NOT_FOUND, "Bot not found for company: " + companyName
             );
         }
-
         // Delegate the update to the appropriate bot
         try {
             return webhookBot.onWebhookUpdateReceived(update);

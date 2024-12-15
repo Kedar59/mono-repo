@@ -2,12 +2,17 @@ server:
   port: 8081
 spring:
   application:
-    name=companyapp
+    name: company-service
   data:
     mongodb:
       uri: mongodb+srv://kedar:${mongodb.password}@true-caller-api-test.hdcue.mongodb.net/
 #      uri: mongodb://localhost:27017/
       database: trueCallerDB
+  security:
+    cors:
+      allowed-origins: "*"
+      allowed-methods: "*"
+      allowed-headers: "*"
 spring-doc:
   api-docs:
     groups:
@@ -20,3 +25,13 @@ spring-doc:
   override-with-generic-response: true
 
   
+jwt:
+  secret: ${jwt.secret}  # Match the secret in API Gateway
+  expiration: 86400
+
+# Security Configuration
+#security:
+#  jwt:
+#    token:
+#      secret-key: your-256-bit-secret
+#      expire-length: 86400000  # 24 hours in milliseconds

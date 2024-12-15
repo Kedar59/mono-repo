@@ -57,7 +57,7 @@ public class BotInitializer {
         logger.info("list of bots : "+listBots.toString());
         botRegistry = new HashMap<String,WebhookBot>();
         for(CompanyBot bot : listBots){
-            String botWebhookUrl = webhookPath + "/" + bot.getCompanyName();
+            String botWebhookUrl = webhookPath + "/truecaller_api/webhook/" + bot.getCompanyName();
             String baseUrl = "https://api.telegram.org/bot" + bot.getBotToken();
             try {
                 boolean isWebhookSet = setWebhook(baseUrl, botWebhookUrl);
@@ -75,7 +75,7 @@ public class BotInitializer {
                 WebhookBot webhookBot = applicationContext.getBean(WebhookBot.class, bot.getBotToken());
                 webhookBot.setBotUsername(bot.getCompanyName());
                 webhookBot.setBotToken(bot.getBotToken());
-                webhookBot.setBotPath(webhookPath+"/"+bot.getCompanyName());
+                webhookBot.setBotPath(webhookPath+"/truecaller_api/webhook/"+bot.getCompanyName());
 //                webhookBot.setWebhook(SetWebhook.builder().url(webhookBot.getBotPath()).build());
                 TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
                 telegramBotsApi.registerBot(webhookBot, SetWebhook.builder().url(webhookBot.getBotPath()).build());
@@ -85,7 +85,6 @@ public class BotInitializer {
                 logger.error("Failed to register webhook: ", e);
             }
         }
-
     }
     private boolean setWebhook(String baseUrl, String botWebhookUrl) {
         String setWebhookUrl = baseUrl + "/setWebhook?url=" + botWebhookUrl;

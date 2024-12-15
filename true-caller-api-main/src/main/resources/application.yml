@@ -8,6 +8,14 @@ spring:
       uri: mongodb+srv://kedar:${mongodb.password}@true-caller-api-test.hdcue.mongodb.net/
       database: trueCallerDB
 #      uri: mongodb://localhost:27017/
+  security:
+    cors:
+      allowed-origins: "*"
+      allowed-methods: "*"
+      allowed-headers: "*"
+jwt:
+  secret: ${jwt.secret} # Match the secret in API Gateway
+  expiration: 86400
 spring-doc:
   api-docs:
     groups:
@@ -26,3 +34,12 @@ telegrambot:
   botUsername: ${telegrambot.botUsername}
   botToken: ${telegrambot.botToken}
   webhookPath: ${telegrambot.webhookPath}
+  
+
+
+# Security Configuration
+#security:
+#  jwt:
+#    token:
+#      secret-key: your-256-bit-secret
+#      expire-length: 86400000  # 24 hours in milliseconds

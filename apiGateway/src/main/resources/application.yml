@@ -1,0 +1,49 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  data:
+    mongodb:
+      uri: mongodb+srv://kedar:${mongodb.password}@true-caller-api-test.hdcue.mongodb.net/
+      database: trueCallerDB
+  #      uri: mongodb://localhost:27017/
+  cloud:
+    gateway:
+      routes:
+        - id: truecaller
+          uri: http://localhost:8083  # Truecaller API service URL
+          predicates:
+            - Path=/truecaller_api/**
+          filters:
+            - AuthFilter
+        
+        - id: company-service
+          uri: http://localhost:8081 # Review App service URL
+          predicates:
+            - Path=/review_api/**
+          filters:
+            - AuthFilter
+  security:
+    cors:
+      allowed-origins: "http://localhost:5173" # Adjust to your frontend URL
+      allowed-methods: "*"
+      allowed-headers: "*"
+
+jwt:
+  secret: ${jwt.secret}  # Use a strong, environment-specific secret
+  expiration: 86400  # 24 hours in seconds
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+# Optional Eureka Configuration
+#eureka:
+#  client:
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
+#  instance:
+#    prefer-ip-address: true

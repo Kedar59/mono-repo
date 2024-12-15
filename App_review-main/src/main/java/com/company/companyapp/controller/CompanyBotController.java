@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/companyBot")
+@RequestMapping("/review_api/companyBot")
 public class CompanyBotController {
     @Autowired
     private CompanyService companyService;

@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/company")
+@RequestMapping("/review_api/company")
 public class CompanyController {
 
     @Autowired
