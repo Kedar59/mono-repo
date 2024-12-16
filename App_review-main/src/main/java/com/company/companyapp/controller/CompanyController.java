@@ -117,7 +117,7 @@ public class CompanyController {
         if (existingCompany.isPresent()) {
             return ResponseEntity.status(HttpStatus.FOUND).body("Company already exists!");
         }
-        String url = "http://localhost:8083/profile/getProfile?countryCode="
+        String url = "http://localhost:8083/truecaller_api/profile/getProfile?countryCode="
                 + URLEncoder.encode(companyDetails.getOwner().getCountryCode(), StandardCharsets.UTF_8)
                 + "&number=" + companyDetails.getOwner().getNumber();
 

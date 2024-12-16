@@ -43,7 +43,7 @@ public class WebhookBot extends TelegramWebhookBot {
 
     // RestTemplate to interact with Spring Boot API
     private RestTemplate restTemplate = new RestTemplate();
-    private String companyBotApiUrl = "http://localhost:8081/api/companyBot/companyBotMenu";
+    private String companyBotApiUrl = "http://localhost:8081/review_api/companyBot/companyBotMenu";
 
     @Override
     public String getBotPath() {
@@ -174,7 +174,7 @@ public class WebhookBot extends TelegramWebhookBot {
             // Use RestTemplate to send the review to the endpoint
             try {
                 RestTemplate restTemplate = new RestTemplate();
-                String endpointUrl = "http://localhost:8081/api/reviews/registerReview";
+                String endpointUrl = "http://localhost:8081/review_api/reviews/registerReview";
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.APPLICATION_JSON);

@@ -8,11 +8,6 @@ spring:
       uri: mongodb+srv://kedar:${mongodb.password}@true-caller-api-test.hdcue.mongodb.net/
 #      uri: mongodb://localhost:27017/
       database: trueCallerDB
-  security:
-    cors:
-      allowed-origins: "*"
-      allowed-methods: "*"
-      allowed-headers: "*"
 spring-doc:
   api-docs:
     groups:

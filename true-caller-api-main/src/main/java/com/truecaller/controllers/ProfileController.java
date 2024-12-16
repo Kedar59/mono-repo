@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,35 +24,8 @@ public class ProfileController {
     @Autowired
     private ProfileService profileService;
     @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
     private OtpService otpService;
     private Logger logger = LoggerFactory.getLogger(ProfileController.class);
-    @PostMapping("/authenticate")
-    public AuthenticationResponse authenticateUser(@RequestBody AuthenticationRequest request) {
-        Optional<Profile> profileOptional = profileService.getProfileByEmail(request.getEmail());
-
-        if (profileOptional.isPresent()) {
-            Profile profile = profileOptional.get();
-
-            // Use BCrypt to check password
-            if (passwordEncoder.matches(request.getPassword(), profile.getPassword())) {
-                return new AuthenticationResponse(
-                        null,  // No token generated here
-                        true,
-                        "Authentication successful",
-                        profile
-
-                );
-            }
-        }
-
-        return new AuthenticationResponse(
-                null,
-                false,
-                "Invalid credentials"
-        );
-    }
 
     @PostMapping("/registerProfile")
     public ResponseEntity<?> registerProfile(@RequestBody Profile profile){

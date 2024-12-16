@@ -5,6 +5,8 @@ import com.company.companyapp.model.Company;
 import com.company.companyapp.model.CompanyBot;
 import com.company.companyapp.service.CompanyBotService;
 import com.company.companyapp.service.CompanyService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ public class CompanyBotController {
     private CompanyService companyService;
     @Autowired
     private CompanyBotService companyBotService;
+    private Logger logger = LoggerFactory.getLogger(CompanyBotController.class);
     @PostMapping("/addCompanyBot")
     public ResponseEntity<?> addCompanyBot(@RequestBody CompanyBot companyBot){
         Optional<CompanyBot> companyBotOptional = companyBotService.getCompanyBotByName(companyBot.getCompanyName());
@@ -34,6 +37,7 @@ public class CompanyBotController {
     }
     @GetMapping("/allBots")
     public ResponseEntity<List<CompanyBot>> getAllCompanyBots(){
+        logger.info("In all bots hit");
         return ResponseEntity.ok(companyBotService.getAllBots());
     }
 

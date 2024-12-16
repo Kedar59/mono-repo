@@ -8,11 +8,6 @@ spring:
       uri: mongodb+srv://kedar:${mongodb.password}@true-caller-api-test.hdcue.mongodb.net/
       database: trueCallerDB
 #      uri: mongodb://localhost:27017/
-  security:
-    cors:
-      allowed-origins: "*"
-      allowed-methods: "*"
-      allowed-headers: "*"
 jwt:
   secret: ${jwt.secret} # Match the secret in API Gateway
   expiration: 86400

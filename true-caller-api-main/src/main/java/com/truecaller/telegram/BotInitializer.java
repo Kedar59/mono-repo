@@ -51,7 +51,7 @@ public class BotInitializer {
     public void init() {
         logger.info("Initializing bot with webhookPath: {}", webhookPath);
         logger.info("Bot username: {}", botUsername);
-        CompanyBot[] listCompanyBots = restTemplate.getForObject("http://localhost:8081/api/companyBot/allBots", CompanyBot[].class);
+        CompanyBot[] listCompanyBots = restTemplate.getForObject("http://localhost:8081/review_api/companyBot/allBots", CompanyBot[].class);
         assert listCompanyBots != null;
         List<CompanyBot> listBots = Arrays.stream(listCompanyBots).toList();
         logger.info("list of bots : "+listBots.toString());

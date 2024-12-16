@@ -68,17 +68,6 @@
 			<artifactId>spring-data-mongodb</artifactId>
 			<version>4.3.4</version>
 		</dependency>
-        <!-- Spring Security for authentication -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <!-- JWT for token parsing -->
-        <dependency>
-            <groupId>io.jsonwebtoken</groupId>
-            <artifactId>jjwt</artifactId>
-            <version>0.9.1</version>
-        </dependency>
 	</dependencies>
 
 	<repositories>
