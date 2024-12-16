@@ -1,6 +1,7 @@
-package com.truecaller.error;
+package com.apiGateway.errors;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 public class ErrorResponse {
     private LocalDateTime timestamp;
@@ -15,8 +16,8 @@ public class ErrorResponse {
     public ErrorResponse(String message, String details) {
         this.message = message;
         this.details = details;
+        this.timestamp = LocalDateTime.now();
     }
-
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
@@ -41,3 +42,4 @@ public class ErrorResponse {
         this.details = details;
     }
 }
+

@@ -10,7 +10,7 @@ twilio:
   phoneNumber: VIRTUAL_PHONE_NUMBER
 telegram:
   authToken: BOT_AUTH_TOKEN
-  username: BOT_USERNAME
+  email: BOT_USERNAME
 ```
 ### Telegram bot
 To request otp use command : ```/requestotp```

@@ -21,20 +21,22 @@ public class JwtService {
     // Replace this with a secure key in a real application, ideally fetched from environment variables
     @Value("${jwt.secret}")
     private String SECRET;
+    @Value("${jwt.expiration}")
+    private long expiration;
 
     // Generate token with given user name
-    public String generateToken(String userName) {
+    public String generateToken(String email) {
         Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userName);
+        return createToken(claims, email);
     }
 
     // Create a JWT token with specified claims and subject (user name)
-    private String createToken(Map<String, Object> claims, String userName) {
+    private String createToken(Map<String, Object> claims, String email) {
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(userName)
+                .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30)) // Token valid for 30 minutes
+                .setExpiration(new Date(System.currentTimeMillis() + 1000*expiration )) // Token valid for 30 minutes
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

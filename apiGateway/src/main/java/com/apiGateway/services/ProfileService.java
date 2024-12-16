@@ -41,8 +41,16 @@ public class ProfileService implements UserDetailsService {
     public Optional<Profile> getProfileByEmail(String email) {
         return repository.findByEmail(email);
     }
-
-
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Optional<Profile> profileDetails = repository.findByEmail(email);
+        return profileDetails.map(ProfileDetails::new)
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "Email not found please register your email : "+email));
+    }
+    public boolean checkPassword(String password,String encryptedPassword){
+        return encoder.matches(password,encryptedPassword);
+    }
     public Optional<Profile> getProfileByCallerID(String number,String countryCode){
         logger.info("in profileServiceImplements number:"+number+" countryCode : "+countryCode);
         return repository.findByCallerId(number,countryCode);
@@ -58,11 +66,5 @@ public class ProfileService implements UserDetailsService {
         profile.setPassword(encoder.encode(profile.getPassword()));
         return repository.save(profile);
     }
-    @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<Profile> profileDetails = repository.findByEmail(email);
-        return profileDetails.map(ProfileDetails::new)
-        .orElseThrow(() -> new UsernameNotFoundException(
-                "Email not found please register your email : "+email));
-    }
+
 }
