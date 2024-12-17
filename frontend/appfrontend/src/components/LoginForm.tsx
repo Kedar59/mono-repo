@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link , useNavigate } from "react-router-dom";
+import { useAuth } from './UseAuth.ts';
 import "../App.css";
 import getResponseData from "../util";
 
@@ -9,21 +10,12 @@ const LoginForm: React.FC = () => {
         email: "",
         password: "",
     });
+    const { login } = useAuth();
+    const navigate = useNavigate();
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
-    // const getResponseData = async (res: Response) => { return res.json()}
-    // async function getResponseData<T>(response: Response): Promise<T> {
-    //     // Check if the response is successful
-    //     if (!response.ok) {
-    //         // Throw an error with the status code
-    //         throw new Error(`HTTP error! status: ${response.status}`);
-    //     }
-    
-    //     // Parse and return the JSON data
-    //     return await response.json();
-    // }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -43,13 +35,15 @@ const LoginForm: React.FC = () => {
                     body: JSON.stringify(requestBody),
                 }
             );
-            // ).then(async (res) => { return res.json() });
+            
             if (response.ok) {
-                // console.log("login succesful :"+JSON.stringify(response));
-                // const data = await response.json();
                 const data = await getResponseData(response);
                 console.log(data)
                 alert("login successful successful :"+data);
+                login(data.jwtToken);
+            
+            // Redirect to dashboard or home page
+                navigate('/');
             } else {
                 const data = await getResponseData(response);
                 console.log(data)
