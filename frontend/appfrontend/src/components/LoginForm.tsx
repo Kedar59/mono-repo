@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "../App.css";
+import getResponseData from "../util";
 
 
 const LoginForm: React.FC = () => {
@@ -12,6 +13,17 @@ const LoginForm: React.FC = () => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
+    // const getResponseData = async (res: Response) => { return res.json()}
+    // async function getResponseData<T>(response: Response): Promise<T> {
+    //     // Check if the response is successful
+    //     if (!response.ok) {
+    //         // Throw an error with the status code
+    //         throw new Error(`HTTP error! status: ${response.status}`);
+    //     }
+    
+    //     // Parse and return the JSON data
+    //     return await response.json();
+    // }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -19,7 +31,7 @@ const LoginForm: React.FC = () => {
         const requestBody = {
             ...formData
         };
-
+        console.log(requestBody)
         try {
             const response = await fetch(
                 "http://localhost:8080/gateway/auth/login",
@@ -31,15 +43,20 @@ const LoginForm: React.FC = () => {
                     body: JSON.stringify(requestBody),
                 }
             );
+            // ).then(async (res) => { return res.json() });
             if (response.ok) {
-                console.log("User registered successfully");
-                alert("Registration successful");
+                // console.log("login succesful :"+JSON.stringify(response));
+                // const data = await response.json();
+                const data = await getResponseData(response);
+                console.log(data)
+                alert("login successful successful :"+data);
             } else {
-                console.error("Failed to register user");
-                alert("Registration failed");
+                const data = await getResponseData(response);
+                console.log(data)
+                alert("login not successful successful :"+data);
             }
         } catch (error) {
-            console.error("Error during registration", error);
+            console.error("Error during login", error);
             alert("An error occurred while registering");
         }
     };

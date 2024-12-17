@@ -55,13 +55,13 @@ public class AuthController {
     public ResponseEntity<?> authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
         Optional<Profile> existingUserEmail = service.getProfileByEmail(authRequest.getEmail());
         if(existingUserEmail.isEmpty()){
-            return ResponseEntity.status(HttpStatus.FOUND).body(new ErrorResponse(
+            return ResponseEntity.status(201).body(new ErrorResponse(
                     "Please register with email "+authRequest.getEmail(),
                     "A Profile with email "+authRequest.getEmail()+" doesn't exists."));
         } else {
             Profile profile = existingUserEmail.get();
             if(!service.checkPassword(authRequest.getPassword(),profile.getPassword())){
-                return ResponseEntity.status(HttpStatus.FOUND).body(new ErrorResponse(
+                return ResponseEntity.status(201).body(new ErrorResponse(
                         "Incorrect password.",
                         "Passwords dont match."));
             }
