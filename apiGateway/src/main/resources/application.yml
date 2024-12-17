@@ -27,7 +27,7 @@ spring:
             - JwtAuthFilter
   security:
     cors:
-      allowed-origins: "http://localhost:5173" # Adjust to your frontend URL
+      allowed-origins: http://localhost:5173/ # Adjust to your frontend URL
       allowed-methods: "*"
       allowed-headers: "*"
 

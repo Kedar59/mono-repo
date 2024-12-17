@@ -3,18 +3,80 @@ import { Link } from "react-router-dom";
 import "../App.css";
 
 const RegistrationForm: React.FC = () => {
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        phoneNumber: "",
+        countryCode: "",
+        location: "",
+        isVerified: true,
+        numberOfSpamCallReports: 0,
+        numberOfSpamSMSReports: 0,
+    });
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if(formData.password != formData.confirmPassword){
+            alert("Passwords dont match");
+        }
+        const requestBody = {
+            email: formData.email,
+            password: formData.password,
+            phoneNumber: formData.phoneNumber,
+            countryCode: formData.countryCode,
+            name: formData.name,
+            isVerified: true,
+            location: formData.location,
+            numberOfSpamCallReports: 0,
+            numberOfSpamSMSReports: 0,
+        };
+
+        try {
+            const response = await fetch(
+                "http://localhost:8080/gateway/auth/addNewUser",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(requestBody),
+                }
+            );
+            if (response.ok) {
+                console.log("User registered successfully");
+                alert("Registration successful");
+            } else {
+                console.error("Failed to register user");
+                alert("Registration failed");
+            }
+        } catch (error) {
+            console.error("Error during registration", error);
+            alert("An error occurred while registering");
+        }
+    };
+
     return (
         <div className="registration-container">
             <div className="form-box">
                 <h2 className="form-title">Register</h2>
-                <form>
+                <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label htmlFor="name" className="form-label">Name</label>
                         <input
                             type="text"
                             id="name"
+                            name="name"
                             className="form-input"
                             placeholder="Enter your name"
+                            value={formData.name}
+                            onChange={handleChange}
                         />
                     </div>
                     <div className="form-group">
@@ -22,8 +84,11 @@ const RegistrationForm: React.FC = () => {
                         <input
                             type="email"
                             id="email"
+                            name="email"
                             className="form-input"
                             placeholder="Enter your email"
+                            value={formData.email}
+                            onChange={handleChange}
                         />
                     </div>
                     <div className="form-group">
@@ -31,8 +96,11 @@ const RegistrationForm: React.FC = () => {
                         <input
                             type="password"
                             id="password"
+                            name="password"
                             className="form-input"
                             placeholder="Enter your password"
+                            value={formData.password}
+                            onChange={handleChange}
                         />
                     </div>
                     <div className="form-group">
@@ -40,8 +108,11 @@ const RegistrationForm: React.FC = () => {
                         <input
                             type="password"
                             id="confirmPassword"
+                            name="confirmPassword"
                             className="form-input"
                             placeholder="Confirm your password"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
                         />
                     </div>
                     <div className="form-group">
@@ -49,8 +120,11 @@ const RegistrationForm: React.FC = () => {
                         <input
                             type="tel"
                             id="phoneNumber"
+                            name="phoneNumber"
                             className="form-input"
                             placeholder="Enter your phone number"
+                            value={formData.phoneNumber}
+                            onChange={handleChange}
                         />
                     </div>
                     <div className="form-group">
@@ -58,8 +132,11 @@ const RegistrationForm: React.FC = () => {
                         <input
                             type="text"
                             id="countryCode"
+                            name="countryCode"
                             className="form-input"
                             placeholder="Enter your country code"
+                            value={formData.countryCode}
+                            onChange={handleChange}
                         />
                     </div>
                     <div className="form-group">
@@ -67,8 +144,11 @@ const RegistrationForm: React.FC = () => {
                         <input
                             type="text"
                             id="location"
+                            name="location"
                             className="form-input"
                             placeholder="Enter your location"
+                            value={formData.location}
+                            onChange={handleChange}
                         />
                     </div>
                     <button
