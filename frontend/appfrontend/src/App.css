@@ -1,89 +1,68 @@
-body {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f5f5f5; /* Light background for better contrast */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  width: 100%;
+
+/* NavBar */
+.navbar-container {
+  @apply bg-white shadow-md p-4 flex justify-between items-center;
 }
 
-.registration-form-container {
-  width: 100%;
-  max-width: 8000px; /* Set form width to make it visually balanced */
-  background-color: #ffffff; /* Clean white form background */
-  padding: 2rem;
-  border-radius: 12px; /* Softer border radius for a modern look */
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem; /* Uniform spacing between fields */
+.navbar-buttons .btn {
+  @apply px-4 py-2 rounded text-white font-bold transition-transform duration-300 hover:scale-105;
+}
+
+.login-btn {
+  @apply bg-blue-500 hover:bg-blue-600;
+}
+
+.register-btn {
+  @apply bg-green-500 hover:bg-green-600;
+}
+
+/* HomePage */
+.homepage-container {
+  @apply text-center mt-20;
+}
+
+.homepage-title {
+  @apply text-3xl font-bold;
+}
+
+/* Login Page */
+.login-container {
+  @apply flex justify-center items-center min-h-screen;
+}
+
+.registration-container {
+  @apply flex justify-center p-4 items-center min-h-screen;
+}
+
+.form-box {
+  @apply bg-white p-8 rounded-lg shadow-md w-full max-w-md;
 }
 
 .form-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 1rem; /* Proper spacing below title */
-  color: #333;
-  text-align: center;
+  @apply text-2xl font-bold mb-6 text-center;
 }
 
-.form-field {
-  width: 100%; /* Input fields span full form width */
+.form-group {
+  @apply mb-4;
 }
 
 .form-label {
-  font-size: 0.8rem;
-  font-weight: bold;
-  color: #666;
-  margin-bottom: 0.2rem;
-  display: block;
-  margin-top: 0.6rem;
+  @apply block text-gray-700 mb-2;
 }
 
 .form-input {
-  width: 100%;
-  padding: 0.8rem;
-  font-size: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 6px; /* Softer input box edges */
-  box-sizing: border-box;
-  background-color: #fdfdfd;
-  transition: border-color 0.3s;
+  @apply w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500;
 }
 
-.form-input:focus {
-  border-color: #646cff;
-  outline: none;
+.submit-btn {
+  @apply w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-transform duration-300 hover:scale-105;
 }
 
-.submit-button {
-  width: 100%;
-  background-color: #646cff;
-  color: #fff;
-  padding: 0.8rem;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  font-weight: bold;
-  margin-top: 1rem;
+.register-link {
+  @apply text-center mt-4;
 }
 
-.submit-button:hover {
-  background-color: #5757d1;
+.link-text {
+  @apply text-blue-500 hover:underline ml-1;
 }
 
-@media (max-width: 768px) {
-  .registration-form-container {
-    padding: 1.5rem; /* Adjust padding for smaller screens */
-  }
-
-  .form-title {
-    font-size: 1.8rem; /* Scale down title for small devices */
-  }
-}

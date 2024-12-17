@@ -1,4 +1,5 @@
 package com.apiGateway.controller;
+import com.apiGateway.entities.JwtResponse;
 import com.apiGateway.entities.Profile;
 import com.apiGateway.errors.ErrorResponse;
 import com.apiGateway.services.JwtService;
@@ -69,7 +70,7 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
         );
         if (authentication.isAuthenticated()) {
-            return ResponseEntity.ok(jwtService.generateToken(authRequest.getEmail()));
+            return ResponseEntity.ok(new JwtResponse(jwtService.generateToken(authRequest.getEmail())));
         } else {
             throw new UsernameNotFoundException("Invalid user request!");
         }
