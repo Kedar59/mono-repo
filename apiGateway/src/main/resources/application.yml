@@ -1,6 +1,9 @@
 server:
   port: 8080
-
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.cloud.gateway.mvc: DEBUG
 spring:
   application:
     name: api-gateway
@@ -11,20 +14,8 @@ spring:
   #      uri: mongodb://localhost:27017/
   cloud:
     gateway:
-      routes:
-        - id: truecaller
-          uri: http://localhost:8083  # Truecaller API service URL
-          predicates:
-            - Path=/truecaller_api/**
-          filters:
-            - JwtAuthFilter
-        
-        - id: company-service
-          uri: http://localhost:8081 # Review App service URL
-          predicates:
-            - Path=/review_api/**
-          filters:
-            - JwtAuthFilter
+      mvc:
+        enabled: true
   security:
     cors:
       allowed-origins: http://localhost:5173/ # Adjust to your frontend URL

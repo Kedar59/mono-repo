@@ -1,6 +1,7 @@
 package com.truecaller.controllers;
 
 import com.truecaller.entities.Profile;
+import com.truecaller.error.ErrorResponse;
 import com.truecaller.exceptions.ProfileNotFoundException;
 import com.truecaller.projections.AuthenticationRequest;
 import com.truecaller.projections.AuthenticationResponse;
@@ -26,6 +27,16 @@ public class ProfileController {
     @Autowired
     private OtpService otpService;
     private Logger logger = LoggerFactory.getLogger(ProfileController.class);
+
+    @GetMapping("/getProfileByEmail/{email}")
+    public ResponseEntity<?> getProfileByEmail(@PathVariable String email){
+        Optional<Profile> existingProfile = profileService.getProfileByEmail(email);
+        logger.info("email : "+email);
+        if(existingProfile.isEmpty()){
+            return ResponseEntity.status(201).body(new ErrorResponse("Register a account with email : "+email,"Profile with email \"+email+\" not found"));
+        }
+        return ResponseEntity.ok(existingProfile.get());
+    }
 
     @PostMapping("/registerProfile")
     public ResponseEntity<?> registerProfile(@RequestBody Profile profile){
