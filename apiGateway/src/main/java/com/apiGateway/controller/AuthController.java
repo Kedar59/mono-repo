@@ -1,5 +1,7 @@
 package com.apiGateway.controller;
+import com.apiGateway.DTO.ProfileDTO;
 import com.apiGateway.entities.JwtResponse;
+import com.apiGateway.entities.LoginResponse;
 import com.apiGateway.entities.Profile;
 import com.apiGateway.errors.ErrorResponse;
 import com.apiGateway.services.JwtService;
@@ -70,7 +72,9 @@ public class AuthController {
                 new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
         );
         if (authentication.isAuthenticated()) {
-            return ResponseEntity.ok(new JwtResponse(jwtService.generateToken(authRequest.getEmail())));
+            Profile profile = existingUserEmail.get();
+            ProfileDTO profileDTO = new ProfileDTO(profile.getId(), profile.getEmail(), profile.getName(), profile.isVerified());
+            return ResponseEntity.ok(new LoginResponse(jwtService.generateToken(authRequest.getEmail()),profileDTO));
         } else {
             throw new UsernameNotFoundException("Invalid user request!");
         }

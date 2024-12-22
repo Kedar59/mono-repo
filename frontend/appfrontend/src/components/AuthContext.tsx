@@ -11,17 +11,31 @@ interface JWTPayload {
 }
 
 // Define the shape of user data
-interface UserData {
+// interface UserData {
+//     email: string;
+//     // Add other user properties
+// }
+
+interface User {
+    id: string;
     email: string;
-    // Add other user properties
-}
+    // phoneNumber?: string; // Optional phone number
+    // countryCode?: string;   // Optional country code
+    name: string;
+    // location?: string;      // Optional location
+    // numberOfSpamCallReports?: number; // Optional number of spam call reports
+    // numberOfSpamSMSReports?: number; // Optional number of spam SMS reports
+    // timestamp?: Date | null;  // Optional timestamp
+    verified: boolean;
+  }
 
 // Define the shape of authentication data
 interface AuthContextType {
     token: string | null;
-    user: UserData | null;
-    login: (token: string) => void;
+    user: User | null;
+    login: (token: string, user: User) => void;
     logout: () => void;
+    authenticatedFetch: (url: string) => Promise<Response>,
     isAuthenticated: boolean;
 }
 
@@ -31,6 +45,7 @@ const AuthContext = createContext<AuthContextType>({
     user: null,
     login: () => {},
     logout: () => {},
+    authenticatedFetch: async () => new Response(),
     isAuthenticated: false
 });
 
@@ -38,18 +53,21 @@ const AuthContext = createContext<AuthContextType>({
 const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
     // State for token and user
     const [token, setToken] = useState<string | null>(null);
-    const [user, setUser] = useState<UserData | null>(null);
+    const [user, setUser] = useState<User | null>(null);
 
     // Load token and user from localStorage on initial render
     useEffect(() => {
         const storedToken = localStorage.getItem('authToken');
-        
-        if (storedToken) {
+        const storedUser = localStorage.getItem('user');
+        if (storedToken && storedUser) {
             try {
                 // Decode token and set user data
+                const parsedUser = JSON.parse(storedUser);  
                 const decoded = jwtDecode<JWTPayload>(storedToken);
                 setToken(storedToken);
-                setUser({ email: decoded.sub });
+                if(decoded.sub==parsedUser.email){
+                    setUser(parsedUser);
+                }
             } catch (error) {
                 // If decoding fails, clear the token
                 localStorage.removeItem('authToken');
@@ -59,17 +77,19 @@ const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
     }, []);
 
     // Login method
-    const login = (newToken: string) => {
+    const login = (newToken: string, user: User) => {
         try {
             // Decode token
             const decoded = jwtDecode<JWTPayload>(newToken);
-            
+            if(decoded.sub == user.email){
+                localStorage.setItem('user', JSON.stringify(user));
+            }
             // Store token in localStorage
             localStorage.setItem('authToken', newToken);
             setToken(newToken);
 
             // Set user data from token
-            setUser({ email: decoded.sub });
+            setUser(user);
         } catch (error) {
             console.error('Invalid token', error);
         }
@@ -79,18 +99,17 @@ const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
     const logout = () => {
         // Remove token from localStorage
         localStorage.removeItem('authToken');
-        
+        localStorage.removeItem('user');
         // Clear state
         setToken(null);
         setUser(null);
     };
 
     // Create a fetch wrapper for authenticated requests
-    const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
+    const authenticatedFetch = async (url: string, methodName: string) => {
         const defaultOptions: RequestInit = {
-            ...options,
+            method:methodName,
             headers: {
-                ...options.headers,
                 'Authorization': token ? `Bearer ${token}` : '',
                 'Content-Type': 'application/json',
             },

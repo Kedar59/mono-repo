@@ -4,6 +4,7 @@ import LoginForm from './components/LoginForm';  // Ensure the correct path
 import RegistrationForm from './components/RegistrationForm'; // Ensure the correct path
 import NavBar from "./components/NavBar";
 import HomePage from "./components/HomePage";
+import Profile from "./components/Profile";
 import { AuthProvider, PrivateRoute } from './components/AuthContext';
 
 
@@ -19,7 +20,15 @@ const App: React.FC = () => {
                     <Route path="/" element={<HomePage />} />
                     {/* Route for Login Form */}
                     <Route path="/login" element={<LoginForm />} />
-
+                    {/* Profile Protected route */}
+                    <Route 
+                        path="/profile" 
+                        element={
+                            <PrivateRoute>
+                                <Profile />
+                            </PrivateRoute>
+                        } 
+                    />
                     {/* Route for Registration Form */}
                     <Route path="/register" element={<RegistrationForm />} />
                 </Routes>

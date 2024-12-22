@@ -40,7 +40,7 @@ const LoginForm: React.FC = () => {
                 const data = await getResponseData(response);
                 console.log(data)
                 alert("login successful successful :"+data);
-                login(data.jwtToken);
+                login(data.jwtToken,data.profile);
             
             // Redirect to dashboard or home page
                 navigate('/');

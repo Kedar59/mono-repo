@@ -25,12 +25,19 @@ const NavBar: React.FC = () => {
                         </Link>
                     </>
                 ) : (
-                    <button 
-                        onClick={logout} 
-                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                    >
-                        Logout
-                    </button>
+                    <>
+                        <button
+                            onClick={logout}
+                            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                            Logout
+                        </button>
+                        <Link to="/profile">
+                            <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                                Profile
+                            </button>
+                        </Link>
+                    </>
+
                 )}
             </div>
         </nav>

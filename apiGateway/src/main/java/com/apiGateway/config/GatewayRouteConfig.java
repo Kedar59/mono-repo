@@ -21,6 +21,7 @@ public class GatewayRouteConfig {
                 .POST("/truecaller_api/**", http("http://localhost:8083"))
                 .DELETE("/truecaller_api/**", http("http://localhost:8083"))
                 .PUT("/truecaller_api/**", http("http://localhost:8083"))
+                .OPTIONS("/truecaller_api/**", http("http://localhost:8083")) // Add OPTIONS
                 .build();
     }
     @Bean
@@ -30,6 +31,7 @@ public class GatewayRouteConfig {
                 .POST("/review_api/**", http("http://localhost:8081"))
                 .DELETE("/review_api/**", http("http://localhost:8081"))
                 .PUT("/review_api/**", http("http://localhost:8081"))
+                .OPTIONS("/review_api/**", http("http://localhost:8081")) // Add OPTIONS
                 .build();
     }
 }
