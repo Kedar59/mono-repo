@@ -1,5 +1,6 @@
 package com.company.companyapp.service;
 
+import com.company.companyapp.DTO.CompanyDTO;
 import com.company.companyapp.model.Company;
 
 import java.util.List;
@@ -10,4 +11,5 @@ public interface CompanyService {
     List<String> getAllCompanyNames();
 
     Optional<Company> getCompanyByName(String companyName);
+    List<CompanyDTO> getAllCompanies();
 }

@@ -1,10 +1,12 @@
 package com.company.companyapp.service;
 
+import com.company.companyapp.DTO.CompanyDTO;
 import com.company.companyapp.model.Company; // Ensure you have the correct import
 import com.company.companyapp.repository.CompanyRepository; // Import the repository
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,5 +33,15 @@ public class CompanyServiceImpl implements CompanyService {
     @Override
     public Optional<Company> getCompanyByName(String companyName) {
         return companyRepository.findByName(companyName);
+    }
+
+    @Override
+    public List<CompanyDTO> getAllCompanies() {
+        List<Company> allCompanies = companyRepository.findAll();
+        List<CompanyDTO> companyDTOs = new ArrayList<>();
+        for (Company company : allCompanies) {
+            companyDTOs.add(company.convertToDTO(company));
+        }
+        return companyDTOs;
     }
 }

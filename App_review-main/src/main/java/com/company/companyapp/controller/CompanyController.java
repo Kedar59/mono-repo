@@ -1,5 +1,6 @@
 package com.company.companyapp.controller;
 
+import com.company.companyapp.DTO.CompanyDTO;
 import com.company.companyapp.DTO.Profile;
 import com.company.companyapp.error.ErrorResponse;
 import com.company.companyapp.model.Company;
@@ -49,15 +50,10 @@ public class CompanyController {
     private final Logger logger = LoggerFactory.getLogger(CompanyController.class);
 
     // Endpoint to fetch all company names
-    @GetMapping("/allNames")
-    public ResponseEntity<List<String>> getAllCompanyNames() {
-        try {
-            List<String> companyNames = companyService.getAllCompanyNames(); // Using service layer
-            return ResponseEntity.ok(companyNames);
-        } catch (Exception e) {
-            logger.error("Error fetching company names", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    @GetMapping("/allCompanies")
+    public ResponseEntity<List<CompanyDTO>> getAllCompanyNames() {
+        List<CompanyDTO> companies = companyService.getAllCompanies(); // Using service layer
+        return ResponseEntity.ok(companies);
     }
 
     // Endpoint to receive a review for a company

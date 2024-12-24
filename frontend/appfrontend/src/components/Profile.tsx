@@ -3,6 +3,7 @@ import React, { useState , useEffect } from "react";
 // import { Link , useNavigate } from "react-router-dom";
 import { useAuth } from './UseAuth.ts';
 import "../App.css";
+import getResponseData from "../util.tsx";
 
 interface Profile {
     id: string;
@@ -13,7 +14,6 @@ interface Profile {
     location?: string;
     numberOfSpamCallReports: number;
     numberOfSpamSMSReports: number;
-    timestamp: string | null;
     verified: boolean;
 }
 
@@ -22,7 +22,13 @@ const Profile: React.FC = () => {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
+    const [editableFields, setEditableFields] = useState({
+        name: '',
+        location: '',
+        phoneNumber: '',
+        countryCode: '',
+    });
+    const [isEditing, setIsEditing] = useState(false);
     useEffect(() => {
         const fetchProfile = async () => {
             try {
@@ -49,6 +55,41 @@ const Profile: React.FC = () => {
         }
     }, [user?.email, authenticatedFetch]);
 
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setEditableFields(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSave = async () => {
+        try {
+            if (!profile) return;
+            
+            const updatedData: Profile = {
+                ...profile,
+                name: editableFields.name,
+                location: editableFields.location,
+                phoneNumber: editableFields.phoneNumber,
+                countryCode: editableFields.countryCode,
+            };
+            
+            const response = await authenticatedFetch(
+                "http://localhost:8080/truecaller_api/profile/update", "POST", updatedData
+            );
+            if (!response.ok) {
+                throw new Error('Failed to fetch profile');
+            }
+            const newProf: Profile = await getResponseData(response);
+            setProfile(newProf);
+            setIsEditing(false);
+            setError(null);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An error occurred');
+        }
+    };
+
     if (loading) {
         return <div className="text-center p-4">Loading...</div>;
     }
@@ -64,13 +105,35 @@ const Profile: React.FC = () => {
     return (
         <div className="max-w-2xl mx-auto p-4">
             <div className="bg-white shadow-lg rounded-lg p-6">
-                <h1 className="text-2xl font-bold mb-6 text-gray-800">Profile Information</h1>
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-2xl font-bold text-gray-800">Profile Information</h1>
+                    <button
+                        onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+                        className={`px-4 py-2 rounded ${
+                            isEditing 
+                                ? 'bg-green-500 hover:bg-green-600' 
+                                : 'bg-blue-500 hover:bg-blue-600'
+                        } text-white`}
+                    >
+                        {isEditing ? 'Save Changes' : 'Edit Profile'}
+                    </button>
+                </div>
                 
                 <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <h3 className="text-sm font-medium text-gray-500">Name</h3>
-                            <p className="text-lg text-gray-800">{profile.name}</p>
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={editableFields.name}
+                                    onChange={handleInputChange}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                />
+                            ) : (
+                                <p className="text-lg text-gray-800">{profile.name}</p>
+                            )}
                         </div>
                         
                         <div>
@@ -78,23 +141,51 @@ const Profile: React.FC = () => {
                             <p className="text-lg text-gray-800">{profile.email}</p>
                         </div>
 
-                        {profile.phoneNumber && (
-                            <div>
-                                <h3 className="text-sm font-medium text-gray-500">Phone Number</h3>
+                        <div>
+                            <h3 className="text-sm font-medium text-gray-500">Phone Number</h3>
+                            {isEditing ? (
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        name="countryCode"
+                                        value={editableFields.countryCode}
+                                        onChange={handleInputChange}
+                                        placeholder="Country Code"
+                                        className="mt-1 block w-1/3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    />
+                                    <input
+                                        type="text"
+                                        name="phoneNumber"
+                                        value={editableFields.phoneNumber}
+                                        onChange={handleInputChange}
+                                        placeholder="Phone Number"
+                                        className="mt-1 block w-2/3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                    />
+                                </div>
+                            ) : (
                                 <p className="text-lg text-gray-800">
                                     {profile.countryCode} {profile.phoneNumber}
                                 </p>
-                            </div>
-                        )}
+                            )}
+                        </div>
 
-                        {profile.location && (
-                            <div>
-                                <h3 className="text-sm font-medium text-gray-500">Location</h3>
+                        <div>
+                            <h3 className="text-sm font-medium text-gray-500">Location</h3>
+                            {isEditing ? (
+                                <input
+                                    type="text"
+                                    name="location"
+                                    value={editableFields.location}
+                                    onChange={handleInputChange}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                />
+                            ) : (
                                 <p className="text-lg text-gray-800">{profile.location}</p>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
 
+                    {/* Spam Reports Section */}
                     <div className="border-t pt-4 mt-4">
                         <h3 className="text-lg font-medium text-gray-700 mb-2">Spam Reports</h3>
                         <div className="grid grid-cols-2 gap-4">
@@ -113,6 +204,7 @@ const Profile: React.FC = () => {
                         </div>
                     </div>
 
+                    {/* Verification Status */}
                     <div className="flex items-center mt-4">
                         <span className={`px-3 py-1 rounded-full text-sm ${
                             profile.verified 
@@ -125,7 +217,8 @@ const Profile: React.FC = () => {
                 </div>
             </div>
         </div>
-    );
+    );
+
 };
 
 export default Profile;

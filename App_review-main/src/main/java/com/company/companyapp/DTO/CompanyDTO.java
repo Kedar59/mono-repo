@@ -1,32 +1,21 @@
-package com.company.companyapp.model;
+package com.company.companyapp.DTO;
 
-import com.company.companyapp.DTO.CallerID;
-import com.company.companyapp.DTO.CompanyDTO;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "company")
-public class Company {
-
-    @Id
+public class CompanyDTO {
     private String id;
-    @Indexed(unique = true)
     private String name;
     private CallerID owner;
     private String description;
-    private int followers;
-    private double rating; // New field for storing average rating
-    public CompanyDTO convertToDTO(Company company){
-        return new CompanyDTO(company.getId(),company.getName(),company.getOwner(),company.getDescription(),company.getRating());
-    }
-    public Company(){}
-    public Company(String id, String name, CallerID owner, String description, int followers, double rating) {
+    private double rating;
+    public CompanyDTO(){}
+
+    public CompanyDTO(String id, String name, CallerID owner, String description, double rating) {
         this.id = id;
         this.name = name;
         this.owner = owner;
         this.description = description;
-        this.followers = followers;
         this.rating = rating;
     }
 
@@ -60,14 +49,6 @@ public class Company {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public int getFollowers() {
-        return followers;
-    }
-
-    public void setFollowers(int followers) {
-        this.followers = followers;
     }
 
     public double getRating() {

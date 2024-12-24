@@ -37,6 +37,7 @@ interface AuthContextType {
     logout: () => void;
     authenticatedFetch: (url: string) => Promise<Response>,
     isAuthenticated: boolean;
+    loading: boolean;
 }
 
 // Create the context with a default value
@@ -46,7 +47,8 @@ const AuthContext = createContext<AuthContextType>({
     login: () => {},
     logout: () => {},
     authenticatedFetch: async () => new Response(),
-    isAuthenticated: false
+    isAuthenticated: false,
+    loading: true
 });
 
 // Authentication Provider Component
@@ -54,7 +56,8 @@ const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
     // State for token and user
     const [token, setToken] = useState<string | null>(null);
     const [user, setUser] = useState<User | null>(null);
-
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
     // Load token and user from localStorage on initial render
     useEffect(() => {
         const storedToken = localStorage.getItem('authToken');
@@ -68,12 +71,14 @@ const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
                 if(decoded.sub==parsedUser.email){
                     setUser(parsedUser);
                 }
+                setIsAuthenticated(true);
             } catch (error) {
                 // If decoding fails, clear the token
                 localStorage.removeItem('authToken');
                 console.log(error)
             }
         }
+        setLoading(false)
     }, []);
 
     // Login method
@@ -90,6 +95,7 @@ const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
 
             // Set user data from token
             setUser(user);
+            setIsAuthenticated(true);
         } catch (error) {
             console.error('Invalid token', error);
         }
@@ -103,10 +109,11 @@ const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
         // Clear state
         setToken(null);
         setUser(null);
+        setIsAuthenticated(false);
     };
 
     // Create a fetch wrapper for authenticated requests
-    const authenticatedFetch = async (url: string, methodName: string) => {
+    const authenticatedFetch = async (url: string, methodName: string, body: any) => {
         const defaultOptions: RequestInit = {
             method:methodName,
             headers: {
@@ -114,6 +121,9 @@ const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
                 'Content-Type': 'application/json',
             },
         };
+        if(body){
+            defaultOptions.body = JSON.stringify(body);
+        }
 
         return fetch(url, defaultOptions);
     };
@@ -121,6 +131,7 @@ const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
     // Provide context value
     const contextValue = {
         token,
+        loading,
         user,
         login,
         logout,
@@ -134,18 +145,38 @@ const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
         </AuthContext.Provider>
     );
 };
-const PrivateRoute: React.FC<{children: React.ReactNode}> = ({ children }) => {
-    const { isAuthenticated } = useAuth();
+// const PrivateRoute: React.FC<{children: React.ReactNode}> = ({ children }) => {
+//     const { isAuthenticated} = useAuth();
+//     const navigate = useNavigate();
+
+//     useEffect(() => {
+//         if (!isAuthenticated) {
+//             // Redirect to login if not authenticated
+
+//             console.log("Refreshed page")
+//             navigate('/login');
+//         }
+//     }, [isAuthenticated, navigate]);
+
+//     return isAuthenticated ? <>{children}</> : null;
+// };
+
+const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { isAuthenticated, loading } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!isAuthenticated) {
-            // Redirect to login if not authenticated
+        if (!loading && !isAuthenticated) {
+            console.log("User not authenticated, redirecting to login.");
             navigate('/login');
         }
-    }, [isAuthenticated, navigate]);
+    }, [isAuthenticated, loading, navigate]);
+
+    if (loading) {
+        // Optionally display a loading spinner or placeholder
+        return <div>Loading...</div>;
+    }
 
     return isAuthenticated ? <>{children}</> : null;
 };
-
 export { AuthProvider , AuthContext , PrivateRoute };

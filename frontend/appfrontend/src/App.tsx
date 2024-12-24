@@ -6,6 +6,7 @@ import NavBar from "./components/NavBar";
 import HomePage from "./components/HomePage";
 import Profile from "./components/Profile";
 import { AuthProvider, PrivateRoute } from './components/AuthContext';
+import SearchCompanies from "./components/SearchCompanies";
 
 
 
@@ -29,6 +30,12 @@ const App: React.FC = () => {
                             </PrivateRoute>
                         } 
                     />
+                    {/* Companies */}
+                    <Route path="/companies" element={
+                            <PrivateRoute>
+                                <SearchCompanies />
+                            </PrivateRoute>
+                        } />
                     {/* Route for Registration Form */}
                     <Route path="/register" element={<RegistrationForm />} />
                 </Routes>

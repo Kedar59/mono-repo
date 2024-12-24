@@ -1,6 +1,7 @@
 package com.truecaller.entities;
 
 
+import com.truecaller.projections.ProfileDTO;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
@@ -38,7 +39,9 @@ public class Profile {
 
     public Profile() {
     }
-
+    public ProfileDTO convertToDto(Profile profile) {
+        return new ProfileDTO(profile.getId(), profile.getEmail(), profile.getPhoneNumber(), profile.getCountryCode(), profile.getName(), profile.isVerified(), profile.getLocation(), profile.getNumberOfSpamCallReports(), profile.getNumberOfSpamSMSReports());
+    }
     public Profile(String id, String email, String password, String phoneNumber, String countryCode, String name,
                    boolean isVerified, String location, int numberOfSpamCallReports,
                    int numberOfSpamSMSReports, Date timestamp) {

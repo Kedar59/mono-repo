@@ -16,11 +16,11 @@ spring:
     gateway:
       mvc:
         enabled: true
-  security:
-    cors:
-      allowed-origins: http://localhost:5173/ # Adjust to your frontend URL
-      allowed-methods: "*"
-      allowed-headers: "*"
+#  security:
+#    cors:
+#      allowed-origins: http://localhost:5173/ # Adjust to your frontend URL
+#      allowed-methods: "*"
+#      allowed-headers: "*"
 
 jwt:
   secret: ${jwt.secret}  # Use a strong, environment-specific secret
