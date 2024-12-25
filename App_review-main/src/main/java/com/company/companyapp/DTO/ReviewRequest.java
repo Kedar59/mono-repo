@@ -39,4 +39,3 @@ public class ReviewRequest {
         this.phoneNumber = phoneNumber;
     }
 }
-

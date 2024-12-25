@@ -57,54 +57,59 @@ public class CompanyController {
     }
 
     // Endpoint to receive a review for a company
-//    @PostMapping("/receiveReview")
-//    public ResponseEntity<String> receiveReview(@RequestBody Map<String, String> reviewDetails) {
-//        String companyName = reviewDetails.get("companyName");
-//        String review = reviewDetails.get("review");
-//        String reviewer = reviewDetails.get("reviewer");
-//        String phoneNumber = reviewDetails.get("phoneNumber");  // This should now be passed from CallerID
-//        int rating = Integer.parseInt(reviewDetails.get("rating"));
-//
-//        Optional<Company> optionalCompany = companyRepository.findByName(companyName);
-//        if (optionalCompany.isPresent()) {
-//            Company company = optionalCompany.get();
-//            String companyId = company.getId();
-//
-//            // Create and save the review
-//            Review newReview = new Review(companyId, reviewer, phoneNumber, review, rating);
-//            reviewRepository.save(newReview);
-//
-//            // Update the company's average rating
-//            updateCompanyRating(companyId);
-//
-//            return ResponseEntity.ok("Review added successfully!");
-//        } else {
-//            return ResponseEntity.badRequest().body("Company not found");
-//        }
-//    }
+    // @PostMapping("/receiveReview")
+    // public ResponseEntity<String> receiveReview(@RequestBody Map<String, String>
+    // reviewDetails) {
+    // String companyName = reviewDetails.get("companyName");
+    // String review = reviewDetails.get("review");
+    // String reviewer = reviewDetails.get("reviewer");
+    // String phoneNumber = reviewDetails.get("phoneNumber"); // This should now be
+    // passed from CallerID
+    // int rating = Integer.parseInt(reviewDetails.get("rating"));
+    //
+    // Optional<Company> optionalCompany =
+    // companyRepository.findByName(companyName);o
+    // if (optionalCompany.isPresent()) {
+    // Company company = optionalCompany.get();
+    // String companyId = company.getId();
+    //
+    // // Create and save the review
+    // Review newReview = new Review(companyId, reviewer, phoneNumber, review,
+    // rating);
+    // reviewRepository.save(newReview);
+    //
+    // // Update the company's average rating
+    // updateCompanyRating(companyId);
+    //
+    // return ResponseEntity.ok("Review added successfully!");
+    // } else {
+    // return ResponseEntity.badRequest().body("Company not found");
+    // }
+    // }
 
-//    private void updateCompanyRating(String companyId) {
-//        List<Review> reviews = reviewRepository.findByCompanyId(companyId);
-//        double newAverageRating = reviews.stream()
-//                .mapToInt(Review::getRating)
-//                .average()
-//                .orElse(0.0);
-//
-//        Company company = companyRepository.findById(companyId).orElseThrow();
-//        company.setRating(newAverageRating);
-//        companyRepository.save(company);
-//    }
+    // private void updateCompanyRating(String companyId) {
+    // List<Review> reviews = reviewRepository.findByCompanyId(companyId);
+    // double newAverageRating = reviews.stream()
+    // .mapToInt(Review::getRating)
+    // .average()
+    // .orElse(0.0);
+    //
+    // Company company = companyRepository.findById(companyId).orElseThrow();
+    // company.setRating(newAverageRating);
+    // companyRepository.save(company);
+    // }
 
-//    @GetMapping("/{companyId}/reviews")
-//    public ResponseEntity<List<Review>> getReviewsByCompany(@PathVariable String companyId) {
-//        List<Review> reviews = reviewRepository.findByCompanyId(companyId);
-//
-//        if (reviews.isEmpty()) {
-//            return ResponseEntity.noContent().build();
-//        }
-//
-//        return ResponseEntity.ok(reviews);
-//    }
+    // @GetMapping("/{companyId}/reviews")
+    // public ResponseEntity<List<Review>> getReviewsByCompany(@PathVariable String
+    // companyId) {
+    // List<Review> reviews = reviewRepository.findByCompanyId(companyId);
+    //
+    // if (reviews.isEmpty()) {
+    // return ResponseEntity.noContent().build();
+    // }
+    //
+    // return ResponseEntity.ok(reviews);
+    // }
 
     // Modified addCompany endpoint to prevent duplicate companies
     @PostMapping("/addCompany")
@@ -113,9 +118,9 @@ public class CompanyController {
         if (existingCompany.isPresent()) {
             return ResponseEntity.status(HttpStatus.FOUND).body("Company already exists!");
         }
-        String url = "http://localhost:8083/truecaller_api/profile/getProfile?countryCode="
-                + URLEncoder.encode(companyDetails.getOwner().getCountryCode(), StandardCharsets.UTF_8)
-                + "&number=" + companyDetails.getOwner().getNumber();
+
+        String url = "http://localhost:8083/truecaller_api/profile/getProfileByEmail/" + companyDetails.getOwnerEmail();
+
 
         logger.info("url -> " + url);
         try {
@@ -131,8 +136,8 @@ public class CompanyController {
             if (profile.isVerified()) {
                 return ResponseEntity.ok(companyRepository.save(companyDetails));
             } else {
-                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Please get your profile with number -> "
-                        + companyDetails.getOwner().getCountryCode() + " " + companyDetails.getOwner().getNumber() + " verified");
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Please get your profile with email -> "
+                        + companyDetails.getOwnerEmail() + " verified");
             }
         } catch (RestClientException e) {
             // Handle any REST client exceptions

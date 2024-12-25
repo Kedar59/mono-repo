@@ -1,11 +1,21 @@
 package com.company.companyapp.DTO;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
+
 public class Profile {
+
     private String id;
+
+    private String email;
+
+    private String password;
 
     private String phoneNumber;
 
@@ -23,10 +33,18 @@ public class Profile {
     public Profile() {
     }
 
-    public Profile(String id, String phoneNumber, String countryCode, String name,
+    public ProfileDTO convertToDto(Profile profile) {
+        return new ProfileDTO(profile.getId(), profile.getEmail(), profile.getPhoneNumber(), profile.getCountryCode(),
+                profile.getName(), profile.isVerified(), profile.getLocation(), profile.getNumberOfSpamCallReports(),
+                profile.getNumberOfSpamSMSReports());
+    }
+
+    public Profile(String id, String email, String password, String phoneNumber, String countryCode, String name,
                    boolean isVerified, String location, int numberOfSpamCallReports,
                    int numberOfSpamSMSReports, Date timestamp) {
         this.id = id;
+        this.email = email;
+        this.password = password;
         this.phoneNumber = phoneNumber;
         this.countryCode = countryCode;
         this.name = name;
@@ -36,7 +54,8 @@ public class Profile {
         this.numberOfSpamSMSReports = numberOfSpamSMSReports;
         this.timestamp = timestamp;
     }
-    public Profile(String phoneNumber,String countryCode,int numberOfSpamCallReports,int numberOfSpamSMSReports){
+
+    public Profile(String phoneNumber, String countryCode, int numberOfSpamCallReports, int numberOfSpamSMSReports) {
         this.phoneNumber = phoneNumber;
         this.countryCode = countryCode;
         this.numberOfSpamCallReports = numberOfSpamCallReports;
@@ -46,12 +65,29 @@ public class Profile {
         this.isVerified = false;
         this.timestamp = new Date();
     }
+
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getPhoneNumber() {

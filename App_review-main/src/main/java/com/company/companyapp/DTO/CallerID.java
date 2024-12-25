@@ -4,7 +4,9 @@ public class CallerID {
     private String number;
     private String countryCode;
 
-    public CallerID(){}
+    public CallerID() {
+    }
+
     public CallerID(String number, String countryCode) {
         this.number = number;
         this.countryCode = countryCode;

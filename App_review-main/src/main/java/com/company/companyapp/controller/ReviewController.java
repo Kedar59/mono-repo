@@ -19,13 +19,15 @@ import java.util.Optional;
 public class ReviewController {
     @Autowired
     ReviewService reviewService;
+
     @PostMapping("/registerReview")
-    public ResponseEntity<Review> addCompanyBot(@RequestBody Review review){
+    public ResponseEntity<Review> addCompanyBot(@RequestBody Review review) {
         review.setTimestamp(new Date());
         return ResponseEntity.ok(reviewService.save(review));
     }
+
     @GetMapping("/getReviewsByCompanyName/{companyName}")
-    public ResponseEntity<List<Review>> getReviewsByCompanyName(@PathVariable String companyName){
+    public ResponseEntity<List<Review>> getReviewsByCompanyName(@PathVariable String companyName) {
         return ResponseEntity.ok(reviewService.reviewsByCompanyName(companyName));
     }
 }

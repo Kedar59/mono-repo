@@ -1,6 +1,5 @@
 package com.company.companyapp.model;
 
-import com.company.companyapp.DTO.CallerID;
 import com.company.companyapp.DTO.CompanyDTO;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -13,20 +12,25 @@ public class Company {
     private String id;
     @Indexed(unique = true)
     private String name;
-    private CallerID owner;
+    private String ownerEmail;
     private String description;
-    private int followers;
+//    private int followers;
     private double rating; // New field for storing average rating
-    public CompanyDTO convertToDTO(Company company){
-        return new CompanyDTO(company.getId(),company.getName(),company.getOwner(),company.getDescription(),company.getRating());
+
+    public CompanyDTO convertToDTO(Company company) {
+        return new CompanyDTO(company.getId(), company.getName(), company.getOwnerEmail(), company.getDescription(),
+                company.getRating());
     }
-    public Company(){}
-    public Company(String id, String name, CallerID owner, String description, int followers, double rating) {
+
+    public Company() {
+    }
+
+    public Company(String id, String name, String ownerEmail, String description, double rating) {
         this.id = id;
         this.name = name;
-        this.owner = owner;
+        this.ownerEmail = ownerEmail;
         this.description = description;
-        this.followers = followers;
+//        this.followers = followers;
         this.rating = rating;
     }
 
@@ -46,12 +50,12 @@ public class Company {
         this.name = name;
     }
 
-    public CallerID getOwner() {
-        return owner;
+    public String getOwnerEmail() {
+        return ownerEmail;
     }
 
-    public void setOwner(CallerID owner) {
-        this.owner = owner;
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
     }
 
     public String getDescription() {
@@ -62,13 +66,13 @@ public class Company {
         this.description = description;
     }
 
-    public int getFollowers() {
-        return followers;
-    }
-
-    public void setFollowers(int followers) {
-        this.followers = followers;
-    }
+//    public int getFollowers() {
+//        return followers;
+//    }
+//
+//    public void setFollowers(int followers) {
+//        this.followers = followers;
+//    }
 
     public double getRating() {
         return rating;

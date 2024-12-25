@@ -11,7 +11,7 @@ public class Review {
 
     @Id
     private String id;
-    private String companyName;  // Link to the company
+    private String companyName; // Link to the company
     private CallerID reviewer;
     private String review;
     private float rating;
@@ -21,7 +21,7 @@ public class Review {
     }
 
     // Constructor
-    public Review(String companyName, CallerID reviewer, String review,float rating) {
+    public Review(String companyName, CallerID reviewer, String review, float rating) {
         this.companyName = companyName;
         this.reviewer = reviewer;
         this.review = review;

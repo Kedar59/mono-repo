@@ -6,15 +6,17 @@ import org.springframework.data.mongodb.core.index.Indexed;
 public class CompanyDTO {
     private String id;
     private String name;
-    private CallerID owner;
+    private String ownerEmail;
     private String description;
     private double rating;
-    public CompanyDTO(){}
 
-    public CompanyDTO(String id, String name, CallerID owner, String description, double rating) {
+    public CompanyDTO() {
+    }
+
+    public CompanyDTO(String id, String name, String ownerEmail, String description, double rating) {
         this.id = id;
         this.name = name;
-        this.owner = owner;
+        this.ownerEmail = ownerEmail;
         this.description = description;
         this.rating = rating;
     }
@@ -35,12 +37,12 @@ public class CompanyDTO {
         this.name = name;
     }
 
-    public CallerID getOwner() {
-        return owner;
+    public String getOwnerEmail() {
+        return ownerEmail;
     }
 
-    public void setOwner(CallerID owner) {
-        this.owner = owner;
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
     }
 
     public String getDescription() {
