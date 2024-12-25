@@ -7,6 +7,7 @@ import HomePage from "./components/HomePage";
 import Profile from "./components/Profile";
 import { AuthProvider, PrivateRoute } from './components/AuthContext';
 import SearchCompanies from "./components/SearchCompanies";
+import RegisterCompany from './components/RegisterCompany';
 
 
 
@@ -38,6 +39,14 @@ const App: React.FC = () => {
                         } />
                     {/* Route for Registration Form */}
                     <Route path="/register" element={<RegistrationForm />} />
+                    <Route 
+                        path="/company/register" 
+                        element={
+                            <PrivateRoute>
+                                <RegisterCompany />
+                            </PrivateRoute>
+                        } 
+                    />
                 </Routes>
             </AuthProvider>
         </Router>
