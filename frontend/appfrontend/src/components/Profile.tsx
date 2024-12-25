@@ -36,7 +36,7 @@ const Profile: React.FC = () => {
                 const response = await authenticatedFetch(
                     `http://localhost:8080/truecaller_api/profile/getProfileByEmail/${user?.email}`,"GET"
                 );
-                
+
                 if (!response.ok) {
                     throw new Error('Failed to fetch profile');
                 }
@@ -66,7 +66,7 @@ const Profile: React.FC = () => {
     const handleSave = async () => {
         try {
             if (!profile) return;
-            
+
             const updatedData: Profile = {
                 ...profile,
                 name: editableFields.name,
@@ -74,7 +74,7 @@ const Profile: React.FC = () => {
                 phoneNumber: editableFields.phoneNumber,
                 countryCode: editableFields.countryCode,
             };
-            
+
             const response = await authenticatedFetch(
                 "http://localhost:8080/truecaller_api/profile/update", "POST", updatedData
             );
@@ -108,17 +108,30 @@ const Profile: React.FC = () => {
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-bold text-gray-800">Profile Information</h1>
                     <button
-                        onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+                        onClick={() => {
+                            if (isEditing) {
+                                handleSave();
+                            } else {
+                                // Populate editableFields with current profile values
+                                setEditableFields({
+                                    name: profile.name || '',
+                                    location: profile.location || '',
+                                    phoneNumber: profile.phoneNumber || '',
+                                    countryCode: profile.countryCode || '',
+                                });
+                                setIsEditing(true);
+                            }
+                        }}
                         className={`px-4 py-2 rounded ${
-                            isEditing 
-                                ? 'bg-green-500 hover:bg-green-600' 
+                            isEditing
+                                ? 'bg-green-500 hover:bg-green-600'
                                 : 'bg-blue-500 hover:bg-blue-600'
                         } text-white`}
                     >
                         {isEditing ? 'Save Changes' : 'Edit Profile'}
                     </button>
                 </div>
-                
+
                 <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -135,7 +148,7 @@ const Profile: React.FC = () => {
                                 <p className="text-lg text-gray-800">{profile.name}</p>
                             )}
                         </div>
-                        
+
                         <div>
                             <h3 className="text-sm font-medium text-gray-500">Email</h3>
                             <p className="text-lg text-gray-800">{profile.email}</p>
@@ -207,8 +220,8 @@ const Profile: React.FC = () => {
                     {/* Verification Status */}
                     <div className="flex items-center mt-4">
                         <span className={`px-3 py-1 rounded-full text-sm ${
-                            profile.verified 
-                                ? 'bg-green-100 text-green-800' 
+                            profile.verified
+                                ? 'bg-green-100 text-green-800'
                                 : 'bg-yellow-100 text-yellow-800'
                         }`}>
                             {profile.verified ? 'Verified' : 'Not Verified'}
@@ -217,7 +230,7 @@ const Profile: React.FC = () => {
                 </div>
             </div>
         </div>
-    );
+    );
 
 };
 
@@ -248,6 +261,6 @@ export default Profile;
 //     };
 
 //     return (
-        
+
 //     );
 // };
