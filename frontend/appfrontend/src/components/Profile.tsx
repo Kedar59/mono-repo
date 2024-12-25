@@ -40,7 +40,6 @@ const Profile: React.FC = () => {
                 if (!response.ok) {
                     throw new Error('Failed to fetch profile');
                 }
-
                 const data = await response.json();
                 setProfile(data);
             } catch (err) {
