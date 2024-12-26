@@ -91,11 +91,17 @@ const CompanyProfile: React.FC = () => {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-3xl font-bold mb-4">{company.name}</h1>
-      <p className="text-gray-700 mb-2">{company.description}</p>
-      <p className="text-gray-500 mb-2">Owner Email: {company.ownerEmail}</p>
-      <p className="text-gray-500 mb-4">Rating: {company.rating}</p>
+    <div className="container mx-auto p-4">
+      <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+        <h2 className="text-2xl font-bold mb-4">{company.name}</h2>
+        <p className="text-gray-600 mb-2">Owner Email: {company.ownerEmail}</p>
+        <p className="text-gray-600 mb-2">Description: {company.description}</p>
+        <div className="flex items-center mb-2">
+          <span className="text-gray-600 mr-2">Rating:</span>
+          <span className="text-yellow-500">{company.rating.toFixed(1)}</span>
+          <span className="text-gray-600 ml-2">({company.numberOfReviews} reviews)</span>
+        </div>
+      </div>
 
       {user?.verified ? (
   <div className="mt-6">
