@@ -10,6 +10,7 @@ export interface Company {
     ownerEmail: string;
     description: string;
     rating: number;
+    numberOfReviews: number;
 }
 const SearchCompanies: React.FC = () => {
     const [searchString, setSearchString] = useState("");

@@ -2,13 +2,26 @@ import React, { useState , useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { Company } from "./SearchCompanies";
 import { useAuth } from './UseAuth.ts';
-interface Review {
+export interface Review {
   id?: string;
   companyName: string;
   reviewerEmail: string | null;
   review: string;
   rating: number;
   timestamp?: string;
+}
+enum Role {
+  NORMAL = 'NORMAL',
+  ADMIN = "ADMIN",
+  MODERATOR = "MODERATOR",
+  NO_ROLE_ASSIGNED = "NO_ROLE_ASSIGNED"
+};
+interface AuthorizationResponse {
+  role: Role;
+}
+interface AuthorizationRequest {
+  profileId?: string;
+  companyId: string;
 }
 const CompanyProfile: React.FC = () => {
   const location = useLocation();
@@ -22,6 +35,7 @@ const CompanyProfile: React.FC = () => {
     review:"",
     rating: 0
   });
+  const [role,setRole] = useState<Role>(Role.NO_ROLE_ASSIGNED);
   useEffect(() => {
     const fetchReviews = async () => {
       if (!company) return;
@@ -41,9 +55,41 @@ const CompanyProfile: React.FC = () => {
         setReviews(null);
       }
     };
+    const getRole = async () => {
+      try {
+        const authorizationRequest:AuthorizationRequest = {
+          profileId: user?.id,
+          companyId: company.id
+        }
+        const response = await authenticatedFetch(
+          `http://localhost:8080/gateway/roles/findRole`,
+          "POST",
+          authorizationRequest
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch reviews");
+        }
 
+        const data:AuthorizationResponse = await response.json();
+        console.log("response : "+data["role"]);
+        if(data["role"]==="ADMIN"){
+          setRole(Role.ADMIN);
+        } else if(data["role"]==="MODERATOR"){
+          setRole(Role.MODERATOR);
+        } else if(data["role"]==="NORMAL"){
+          setRole(Role.NORMAL);
+        } else {
+          setRole(Role.NO_ROLE_ASSIGNED);
+        }
+        console.log("official role : "+role);
+      } catch (err) {
+        setError((err as Error).message);
+        setReviews(null);
+      }
+    }
+    getRole();
     fetchReviews();
-  }, [company , authenticatedFetch]);
+  }, [company , user , authenticatedFetch]);
 
   const handleReviewChange = (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -73,7 +119,12 @@ const CompanyProfile: React.FC = () => {
 
       // Handle successful review registration (e.g., clear the form, update UI)
       console.log("Review registered successfully!");
-      setNewReview(null); // Clear the form after successful submission
+      setNewReview({
+        companyName:company.name,
+        reviewerEmail: user?.email || "",
+        review:"",
+        rating: 0
+      }); // Clear the form after successful submission
     } catch (err) {
       setError((err as Error).message);
     }
@@ -94,6 +145,7 @@ const CompanyProfile: React.FC = () => {
     <div className="container mx-auto p-4">
       <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
         <h2 className="text-2xl font-bold mb-4">{company.name}</h2>
+        <p className="text-gray-600 mb-2">Current user role: {role}</p>
         <p className="text-gray-600 mb-2">Owner Email: {company.ownerEmail}</p>
         <p className="text-gray-600 mb-2">Description: {company.description}</p>
         <div className="flex items-center mb-2">
@@ -162,7 +214,7 @@ const CompanyProfile: React.FC = () => {
         )}
       </div>
 
-      <Link to="/" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 mt-4 inline-block">
+      <Link to="/companies" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 mt-4 inline-block">
         Back to Search
       </Link>
     </div>

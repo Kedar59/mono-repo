@@ -5,9 +5,12 @@ import com.company.companyapp.DTO.Profile;
 import com.company.companyapp.error.ErrorResponse;
 import com.company.companyapp.model.Company;
 import com.company.companyapp.model.Review;
+import com.company.companyapp.model.Role;
+import com.company.companyapp.model.Roles;
 import com.company.companyapp.repository.CompanyRepository;
 import com.company.companyapp.repository.ReviewRepository;
 import com.company.companyapp.service.CompanyService;
+import com.company.companyapp.service.RolesService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +40,8 @@ public class CompanyController {
 
     @Autowired
     private CompanyRepository companyRepository;
-
+    @Autowired
+    private RolesService rolesService;
     @Autowired
     private ReviewRepository reviewRepository;
 
@@ -61,63 +65,6 @@ public class CompanyController {
         List<CompanyDTO> companies = companyService.searchForCompanies(companyName); // Using service layer
         return ResponseEntity.ok(companies);
     }
-
-    // Endpoint to receive a review for a company
-    // @PostMapping("/receiveReview")
-    // public ResponseEntity<String> receiveReview(@RequestBody Map<String, String>
-    // reviewDetails) {
-    // String companyName = reviewDetails.get("companyName");
-    // String review = reviewDetails.get("review");
-    // String reviewer = reviewDetails.get("reviewer");
-    // String phoneNumber = reviewDetails.get("phoneNumber"); // This should now be
-    // passed from CallerID
-    // int rating = Integer.parseInt(reviewDetails.get("rating"));
-    //
-    // Optional<Company> optionalCompany =
-    // companyRepository.findByName(companyName);o
-    // if (optionalCompany.isPresent()) {
-    // Company company = optionalCompany.get();
-    // String companyId = company.getId();
-    //
-    // // Create and save the review
-    // Review newReview = new Review(companyId, reviewer, phoneNumber, review,
-    // rating);
-    // reviewRepository.save(newReview);
-    //
-    // // Update the company's average rating
-    // updateCompanyRating(companyId);
-    //
-    // return ResponseEntity.ok("Review added successfully!");
-    // } else {
-    // return ResponseEntity.badRequest().body("Company not found");
-    // }
-    // }
-
-    // private void updateCompanyRating(String companyId) {
-    // List<Review> reviews = reviewRepository.findByCompanyId(companyId);
-    // double newAverageRating = reviews.stream()
-    // .mapToInt(Review::getRating)
-    // .average()
-    // .orElse(0.0);
-    //
-    // Company company = companyRepository.findById(companyId).orElseThrow();
-    // company.setRating(newAverageRating);
-    // companyRepository.save(company);
-    // }
-
-    // @GetMapping("/{companyId}/reviews")
-    // public ResponseEntity<List<Review>> getReviewsByCompany(@PathVariable String
-    // companyId) {
-    // List<Review> reviews = reviewRepository.findByCompanyId(companyId);
-    //
-    // if (reviews.isEmpty()) {
-    // return ResponseEntity.noContent().build();
-    // }
-    //
-    // return ResponseEntity.ok(reviews);
-    // }
-
-    // Modified addCompany endpoint to prevent duplicate companies
     @PostMapping("/addCompany")
     public ResponseEntity<?> addCompany(@RequestBody Company companyDetails) {
         Optional<Company> existingCompany = companyRepository.findByName(companyDetails.getName());
@@ -142,7 +89,9 @@ public class CompanyController {
             Profile profile = mapper.treeToValue(jsonNode, Profile.class);
             logger.info("Received Profile response: " + profile);
             if (profile.isVerified()) {
-                return ResponseEntity.ok(companyRepository.save(companyDetails));
+                Company newCompany = companyRepository.save(companyDetails);
+                Roles roles = rolesService.save(new Roles(profile.getId(), newCompany.getId(), Role.ADMIN));;
+                return ResponseEntity.ok(newCompany);
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Please get your profile with email -> "
                         + companyDetails.getOwnerEmail() + " verified");
