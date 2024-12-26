@@ -11,6 +11,12 @@ public interface CompanyService {
     List<String> getAllCompanyNames();
 
     Optional<Company> getCompanyByName(String companyName);
+
     List<CompanyDTO> getAllCompanies();
+
     List<CompanyDTO> searchForCompanies(String companyName);
+
+    Company save(Company company);
+
+    List<Company> findAll();
 }

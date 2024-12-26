@@ -9,16 +9,19 @@ public class CompanyDTO {
     private String ownerEmail;
     private String description;
     private double rating;
+    private int numberOfReviews;
 
     public CompanyDTO() {
     }
 
-    public CompanyDTO(String id, String name, String ownerEmail, String description, double rating) {
+    public CompanyDTO(String id, String name, String ownerEmail, String description, double rating,
+            int numberOfReviews) {
         this.id = id;
         this.name = name;
         this.ownerEmail = ownerEmail;
         this.description = description;
         this.rating = rating;
+        this.numberOfReviews = numberOfReviews;
     }
 
     public String getId() {
@@ -59,5 +62,13 @@ public class CompanyDTO {
 
     public void setRating(double rating) {
         this.rating = rating;
+    }
+
+    public int getNumberOfReviews() {
+        return numberOfReviews;
+    }
+
+    public void setNumberOfReviews(int numberOfReviews) {
+        this.numberOfReviews = numberOfReviews;
     }
 }

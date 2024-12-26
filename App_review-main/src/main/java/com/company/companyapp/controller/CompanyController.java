@@ -55,8 +55,9 @@ public class CompanyController {
         List<CompanyDTO> companies = companyService.getAllCompanies(); // Using service layer
         return ResponseEntity.ok(companies);
     }
+
     @GetMapping("/searchFor/{companyName}")
-    public ResponseEntity<List<CompanyDTO>> searchCompanies(@PathVariable String companyName){
+    public ResponseEntity<List<CompanyDTO>> searchCompanies(@PathVariable String companyName) {
         List<CompanyDTO> companies = companyService.searchForCompanies(companyName); // Using service layer
         return ResponseEntity.ok(companies);
     }
@@ -124,8 +125,10 @@ public class CompanyController {
             return ResponseEntity.status(HttpStatus.FOUND).body("Company already exists!");
         }
 
-        String url = "http://localhost:8083/truecaller_api/profile/getProfileByEmail/" + companyDetails.getOwnerEmail();
+        companyDetails.setNumberOfReviews(0); // Initialize number of reviews
+        companyDetails.setRating(0.0); // Initialize rating
 
+        String url = "http://localhost:8083/truecaller_api/profile/getProfileByEmail/" + companyDetails.getOwnerEmail();
 
         logger.info("url -> " + url);
         try {

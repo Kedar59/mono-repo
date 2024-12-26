@@ -14,25 +14,26 @@ public class Company {
     private String name;
     private String ownerEmail;
     private String description;
-//    private int followers;
+    // private int followers;
     private double rating; // New field for storing average rating
+    private int numberOfReviews; // Add this field
 
     public CompanyDTO convertToDTO(Company company) {
         return new CompanyDTO(company.getId(), company.getName(), company.getOwnerEmail(), company.getDescription(),
-                company.getRating());
+                company.getRating(), company.getNumberOfReviews());
     }
 
     public Company() {
     }
 
-    public Company(String id, String name, String ownerEmail, String description, double rating) {
+    public Company(String id, String name, String ownerEmail, String description, double rating, int numberOfReviews) {
         this.id = id;
         this.name = name;
         this.ownerEmail = ownerEmail;
         this.description = description;
-//        this.followers = followers;
+        // this.followers = followers;
         this.rating = rating;
-
+        this.numberOfReviews = numberOfReviews;
     }
 
     public String getId() {
@@ -67,13 +68,13 @@ public class Company {
         this.description = description;
     }
 
-//    public int getFollowers() {
-//        return followers;
-//    }
-//
-//    public void setFollowers(int followers) {
-//        this.followers = followers;
-//    }
+    // public int getFollowers() {
+    // return followers;
+    // }
+    //
+    // public void setFollowers(int followers) {
+    // this.followers = followers;
+    // }
 
     public double getRating() {
         return rating;
@@ -81,5 +82,13 @@ public class Company {
 
     public void setRating(double rating) {
         this.rating = rating;
+    }
+
+    public int getNumberOfReviews() {
+        return numberOfReviews;
+    }
+
+    public void setNumberOfReviews(int numberOfReviews) {
+        this.numberOfReviews = numberOfReviews;
     }
 }

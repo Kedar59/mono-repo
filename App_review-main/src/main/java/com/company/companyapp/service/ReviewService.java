@@ -11,10 +11,12 @@ import java.util.List;
 public class ReviewService {
     @Autowired
     ReviewRepository reviewRepository;
-    public Review save(Review review){
+
+    public Review save(Review review) {
         return reviewRepository.save(review);
     }
-    public List<Review> reviewsByCompanyName(String companyName){
+
+    public List<Review> reviewsByCompanyName(String companyName) {
         return reviewRepository.findByNameContaining(companyName);
     }
 }

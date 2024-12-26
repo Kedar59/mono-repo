@@ -14,10 +14,8 @@ import java.util.stream.Collectors;
 @Service
 public class CompanyServiceImpl implements CompanyService {
 
-
     @Autowired
     private CompanyRepository companyRepository; // Inject the repository
-
 
     // New method to fetch all company names
     public List<String> getAllCompanyNames() {
@@ -53,5 +51,15 @@ public class CompanyServiceImpl implements CompanyService {
             companyDTOs.add(company.convertToDTO(company));
         }
         return companyDTOs;
+    }
+
+    @Override
+    public Company save(Company company) {
+        return companyRepository.save(company);
+    }
+
+    @Override
+    public List<Company> findAll() {
+        return companyRepository.findAll();
     }
 }
