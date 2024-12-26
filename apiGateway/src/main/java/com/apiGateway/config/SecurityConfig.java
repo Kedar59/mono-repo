@@ -29,16 +29,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-
     @Autowired
     @Lazy
     private JwtAuthFilter authFilter;
-//
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        return new ProfileService(); // Ensure UserInfoService implements UserDetailsService
-//    }
-
     @Autowired
     @Lazy
     private ProfileService profileService;
@@ -53,8 +46,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for stateless APIs
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/gateway/auth/welcome", "/gateway/auth/addNewUser", "/gateway/auth/login").permitAll()
-//                        .requestMatchers("/auth/user/**").hasAuthority("ROLE_USER")
-//                        .requestMatchers("/auth/admin/**").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated() // Protect all other endpoints
                 )
                 .sessionManagement(sess -> sess

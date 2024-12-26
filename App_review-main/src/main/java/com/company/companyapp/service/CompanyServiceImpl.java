@@ -44,4 +44,14 @@ public class CompanyServiceImpl implements CompanyService {
         }
         return companyDTOs;
     }
+
+    @Override
+    public List<CompanyDTO> searchForCompanies(String companyName) {
+        List<Company> allCompanies = companyRepository.findByNameContaining(companyName);
+        List<CompanyDTO> companyDTOs = new ArrayList<>();
+        for (Company company : allCompanies) {
+            companyDTOs.add(company.convertToDTO(company));
+        }
+        return companyDTOs;
+    }
 }

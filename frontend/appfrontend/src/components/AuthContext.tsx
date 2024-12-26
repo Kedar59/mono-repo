@@ -10,24 +10,12 @@ interface JWTPayload {
     // Add other claims as needed
 }
 
-// Define the shape of user data
-// interface UserData {
-//     email: string;
-//     // Add other user properties
-// }
-
 interface User {
     id: string;
     email: string;
-    // phoneNumber?: string; // Optional phone number
-    // countryCode?: string;   // Optional country code
     name: string;
-    // location?: string;      // Optional location
-    // numberOfSpamCallReports?: number; // Optional number of spam call reports
-    // numberOfSpamSMSReports?: number; // Optional number of spam SMS reports
-    // timestamp?: Date | null;  // Optional timestamp
     verified: boolean;
-  }
+}
 
 // Define the shape of authentication data
 interface AuthContextType {
@@ -145,22 +133,6 @@ const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
         </AuthContext.Provider>
     );
 };
-// const PrivateRoute: React.FC<{children: React.ReactNode}> = ({ children }) => {
-//     const { isAuthenticated} = useAuth();
-//     const navigate = useNavigate();
-
-//     useEffect(() => {
-//         if (!isAuthenticated) {
-//             // Redirect to login if not authenticated
-
-//             console.log("Refreshed page")
-//             navigate('/login');
-//         }
-//     }, [isAuthenticated, navigate]);
-
-//     return isAuthenticated ? <>{children}</> : null;
-// };
-
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isAuthenticated, loading } = useAuth();
     const navigate = useNavigate();

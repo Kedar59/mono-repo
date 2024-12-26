@@ -55,6 +55,11 @@ public class CompanyController {
         List<CompanyDTO> companies = companyService.getAllCompanies(); // Using service layer
         return ResponseEntity.ok(companies);
     }
+    @GetMapping("/searchFor/{companyName}")
+    public ResponseEntity<List<CompanyDTO>> searchCompanies(@PathVariable String companyName){
+        List<CompanyDTO> companies = companyService.searchForCompanies(companyName); // Using service layer
+        return ResponseEntity.ok(companies);
+    }
 
     // Endpoint to receive a review for a company
     // @PostMapping("/receiveReview")

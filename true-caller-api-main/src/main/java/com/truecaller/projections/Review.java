@@ -5,13 +5,13 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
 
-//@Document(collection = "reviews")
+@Document(collection = "reviews")
 public class Review {
 
-//    @Id
+    @Id
     private String id;
-    private String companyName;  // Link to the company
-    private CallerID reviewer;
+    private String companyName; // Link to the company
+    private String reviewerEmail;
     private String review;
     private float rating;
     private Date timestamp;
@@ -20,29 +20,24 @@ public class Review {
     }
 
     // Constructor
-    public Review(String companyName, CallerID reviewer, String review,float rating) {
+    public Review(String companyName, String reviewerEmail, String review, float rating) {
         this.companyName = companyName;
-        this.reviewer = reviewer;
+        this.reviewerEmail = reviewerEmail;
         this.review = review;
         this.rating = rating;
     }
-    public Review(String companyName,CallerID reviewer){
-        this.companyName = companyName;
-        this.reviewer = reviewer;
-        this.rating = 3;
-    }
-    public Review(String companyName){
-        this.companyName = companyName;
-    }
-    public Review(String id, String companyName, CallerID reviewer, String review, float rating, Date timestamp) {
+
+    public Review(String id, String companyName, String reviewerEmail, String review, float rating, Date timestamp) {
         this.id = id;
         this.companyName = companyName;
-        this.reviewer = reviewer;
+        this.reviewerEmail = reviewerEmail;
         this.review = review;
         this.rating = rating;
         this.timestamp = timestamp;
     }
-
+    public Review(String companyName){
+        this.companyName = companyName;
+    }
     public Date getTimestamp() {
         return timestamp;
     }
@@ -67,12 +62,12 @@ public class Review {
         this.companyName = companyName;
     }
 
-    public CallerID getReviewer() {
-        return reviewer;
+    public String getReviewerEmail() {
+        return reviewerEmail;
     }
 
-    public void setReviewer(CallerID reviewer) {
-        this.reviewer = reviewer;
+    public void setReviewerEmail(String reviewerEmail) {
+        this.reviewerEmail = reviewerEmail;
     }
 
     public String getReview() {
@@ -91,4 +86,3 @@ public class Review {
         this.rating = rating;
     }
 }
-

@@ -32,6 +32,7 @@ public class Company {
         this.description = description;
 //        this.followers = followers;
         this.rating = rating;
+
     }
 
     public String getId() {

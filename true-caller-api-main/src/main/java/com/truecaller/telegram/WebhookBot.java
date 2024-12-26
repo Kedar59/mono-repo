@@ -111,7 +111,7 @@ public class WebhookBot extends TelegramWebhookBot {
             } else if (requestersProfileOptional.isPresent() && BotState.AWAITING_PHONE_NUMBER==state){
                 Profile reviewersProfile = requestersProfileOptional.get();
                 if(reviewersProfile.isVerified()){
-                    usersReview.setReviewer(new CallerID(reviewersProfile.getPhoneNumber(),reviewersProfile.getCountryCode()));
+                    usersReview.setReviewerEmail(reviewersProfile.getEmail());
                     state = BotState.AWAITING_REVIEW;
                     reviewBotStateService.saveOrUpdateBotState(this.getBotUsername(),id,state,usersReview);
                     confirmationMessage = String.format("""
