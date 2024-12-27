@@ -83,12 +83,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     logger.info("companyId : "+companyId);
                     logger.info("action : "+action);
                     // Check authorization based on action
-                    boolean isAuthorized = switch (action) {
-                        case "delete","addCompanyBot", "promote", "demote" -> authService.isAdmin(profileId, companyId);
-                        case "review", "reply" -> authService.isNormal(profileId, companyId);
-                        default -> true;
+                    boolean isAuthorized = false;
+                    if(action.equals("update")){
+                        isAuthorized = authService.isModerator(profileId,companyId);
+                    }
+                    isAuthorized = switch (action) {
+                        case "delete","addCompanyBot", "update","memberManagementPage","promote", "demote" -> authService.isAdmin(profileId, companyId);
+                        default -> false;
                     };
-
                     if (!isAuthorized) {
                         logger.info("not authorized");
                         response.sendError(HttpStatus.FORBIDDEN.value(), "Insufficient permissions");

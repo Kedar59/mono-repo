@@ -17,5 +17,5 @@ public interface ProfileService {
     List<Profile> searchProfilesByName(String partialName);
     void updateSpamersProfile(Profile spammer, SpamReport spamReport);
     void createSpammerProfile(SpamReport spamReport);
-
+    List<Profile> getListOfProfiles(List<String> userIds);
 }

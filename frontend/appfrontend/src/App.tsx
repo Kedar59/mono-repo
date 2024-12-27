@@ -9,6 +9,7 @@ import { AuthProvider, PrivateRoute } from './components/AuthContext';
 import SearchCompanies from "./components/SearchCompanies";
 import RegisterCompany from './components/RegisterCompany';
 import CompanyProfile from "./components/CompanyProfile";
+import ManageCompanyMembers from "./components/ManageCompanyMembers";
 
 export interface ErrorResponse {
     timestamp: Date;
@@ -46,6 +47,12 @@ const App: React.FC = () => {
                     <Route path="/companyProfile" element={
                             <PrivateRoute>
                                 <CompanyProfile />
+                            </PrivateRoute>
+                        } />
+                    {/* Manage Company Members */}
+                    <Route path="/manageCompanyMembers" element={
+                            <PrivateRoute>
+                                <ManageCompanyMembers />
                             </PrivateRoute>
                         } />
                     {/* Route for Registration Form */}

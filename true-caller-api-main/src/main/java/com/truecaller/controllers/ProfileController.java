@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,17 +26,33 @@ public class ProfileController {
     @Autowired
     private OtpService otpService;
     private Logger logger = LoggerFactory.getLogger(ProfileController.class);
+    @PostMapping("/getprofilesByIds")
+    public ResponseEntity<List<Profile>> getProfilesByIds(@RequestBody ListOfIds listOfIds){
+        return ResponseEntity.ok(profileService.getListOfProfiles(listOfIds.getListOfIds()));
+    }
+
 
     @GetMapping("/getProfileByEmail/{email}")
     public ResponseEntity<?> getProfileByEmail(@PathVariable String email){
         Optional<Profile> existingProfile = profileService.getProfileByEmail(email);
         logger.info("email : "+email);
         if(existingProfile.isEmpty()){
-            return ResponseEntity.status(201).body(new ErrorResponse("Register a account with email : "+email,"Profile with email \"+email+\" not found"));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ErrorResponse("Register a account with email : "+email,"Profile with email \"+email+\" not found"));
         }
         Profile profile = existingProfile.get();
         ProfileDTO dto = profile.convertToDto(profile);
         return ResponseEntity.ok(dto);
+    }
+    @GetMapping("/getProfileWithoutContactByEmail/{email}")
+    public ResponseEntity<?> getProfileWithoutContactByEmail(@PathVariable String email){
+        Optional<Profile> existingProfile = profileService.getProfileByEmail(email);
+        logger.info("email : "+email);
+        if(existingProfile.isEmpty()){
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ErrorResponse(LocalDateTime.now(),"Register a account with email : "+email,"Profile with email \"+email+\" not found"));
+        }
+        Profile profile = existingProfile.get();
+        ProfileWithoutContact withoutContact = profile.convertToProfileWithoutContact(profile);
+        return ResponseEntity.ok(withoutContact);
     }
     @PostMapping("/update")
     public ResponseEntity<?> updateProfile(@RequestBody ProfileDTO profile) {

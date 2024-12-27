@@ -18,5 +18,6 @@ public interface CompanyRepository extends MongoRepository<Company, String> {
 
     @Query("{ 'name': { $regex: ?0, $options: 'i' } }")
     List<Company> findByNameContaining(String name);
+    Optional<Company> findCompanyById(String Id);
 }
 

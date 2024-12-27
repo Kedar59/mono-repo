@@ -234,32 +234,3 @@ const Profile: React.FC = () => {
 };
 
 export default Profile;
-
-// const Profile: React.FC = () => {
-//     const { authenticatedFetch, user } = useAuth();
-//     const [profile, setProfile] = useState<Profile>({
-//         id: "",
-//         email: "",
-//         phoneNumber: "", // Optional
-//         countryCode: "", // Optional
-//         name: "",
-//         location: "", // Optional
-//         numberOfSpamCallReports: 0,
-//         numberOfSpamSMSReports: 0,
-//         timestamp: null,
-//         verified: false,
-//       });
-//     const fetchProtectedData = async () => {
-//         try {
-//             const response = await authenticatedFetch('http://localhost:8080/api/protected-route');
-//             const data = await response.json();
-//             // Handle data
-//         } catch (error) {
-//             // Handle error
-//         }
-//     };
-
-//     return (
-
-//     );
-// };

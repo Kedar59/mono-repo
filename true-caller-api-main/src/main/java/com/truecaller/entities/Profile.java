@@ -1,6 +1,7 @@
 package com.truecaller.entities;
 
 import com.truecaller.projections.ProfileDTO;
+import com.truecaller.projections.ProfileWithoutContact;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
@@ -43,6 +44,9 @@ public class Profile {
         return new ProfileDTO(profile.getId(), profile.getEmail(), profile.getPhoneNumber(), profile.getCountryCode(),
                 profile.getName(), profile.isVerified(), profile.getLocation(), profile.getNumberOfSpamCallReports(),
                 profile.getNumberOfSpamSMSReports());
+    }
+    public ProfileWithoutContact convertToProfileWithoutContact(Profile profile){
+        return new ProfileWithoutContact(profile.getId(), profile.getEmail(),profile.getName(), profile.isVerified(), profile.getLocation(), profile.getNumberOfSpamCallReports(), profile.getNumberOfSpamSMSReports());
     }
 
     public Profile(String id, String email, String password, String phoneNumber, String countryCode, String name,

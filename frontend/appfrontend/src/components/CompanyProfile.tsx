@@ -3,6 +3,7 @@ import { useLocation, Link, useNavigate } from "react-router-dom";
 import { Company } from "./SearchCompanies";
 import { useAuth } from './UseAuth.ts';
 import getResponseData from "../util.tsx";
+import { ErrorResponse } from "../App.tsx";
 export interface Review {
   id?: string;
   companyName: string;
@@ -10,8 +11,8 @@ export interface Review {
   review: string;
   rating: number;
   timestamp?: string;
-}
-enum Role {
+};
+export enum Role {
   NORMAL = 'NORMAL',
   ADMIN = "ADMIN",
   MODERATOR = "MODERATOR",
@@ -19,11 +20,11 @@ enum Role {
 };
 interface AuthorizationResponse {
   role: Role;
-}
+};
 interface AuthorizationRequest {
   profileId?: string;
   companyId: string;
-}
+};
 
 export interface CompanyBot {
   id?: string;
@@ -54,6 +55,8 @@ const CompanyProfile: React.FC = () => {
   });
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [description, setDescription] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
   useEffect(() => {
     const fetchReviews = async () => {
       if (!company) return;
@@ -89,7 +92,6 @@ const CompanyProfile: React.FC = () => {
         }
 
         const data: AuthorizationResponse = await response.json();
-        console.log("response : " + data["role"]);
         if (data["role"] === "ADMIN") {
           setRole(Role.ADMIN);
         } else if (data["role"] === "MODERATOR") {
@@ -99,7 +101,6 @@ const CompanyProfile: React.FC = () => {
         } else {
           setRole(Role.NO_ROLE_ASSIGNED);
         }
-        console.log("official role : " + role);
       } catch (err) {
         setError((err as Error).message);
         setReviews(null);
@@ -160,12 +161,12 @@ const CompanyProfile: React.FC = () => {
       );
       const data = await response.json();
       console.log(data);
-      console.log("response status : "+response.status);
+      console.log("response status : " + response.status);
       if (response.status === 200) {
         setSuccess('Bot registered successfully!');
         setFormData(data);
       } else if (response.status === 201 || response.status === 202) {
-        
+
         setError(`Error: ${data.message}`);
       } else {
         setError('An unexpected error occurred');
@@ -207,7 +208,43 @@ const CompanyProfile: React.FC = () => {
     }
   };
 
-
+  const handleManageCompanyMembers = (company: Company) => {
+    navigate("/manageCompanyMembers", { state: { company } });
+  };
+  const handleSave = async () => {
+    try {
+      console.log("New description : " + description);
+      const response = await authenticatedFetch(
+        `http://localhost:8080/review_api/company/profile/${user?.id}/company/${company.id}/update`,
+        "POST",
+        {
+          id: company.id,
+          name: company.name,
+          description: description
+        }
+      );
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
+      }
+      if (response.status === 200) {
+        navigate("/companies");
+      } else if (response.status === 201 || response.status === 202) {
+        const error: ErrorResponse = await getResponseData(response);
+        setError(`Error: ${error.message}`);
+      } else {
+        setError('An unexpected error occurred');
+      }
+      
+      setIsEditing(false);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    }
+  };
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setDescription(value);
+  };
   if (!company) {
     return (
       <div className="p-4">
@@ -223,8 +260,37 @@ const CompanyProfile: React.FC = () => {
       <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
         <h2 className="text-2xl font-bold mb-4">{company.name}</h2>
         <p className="text-gray-600 mb-2">Current user role: {role}</p>
+        {role !== Role.NORMAL && Role.NO_ROLE_ASSIGNED && (
+          <>
+            <button onClick={() => {
+              if (isEditing) {
+                handleSave();
+              } else {
+                // Populate editableFields with current profile values
+                setDescription(company.description || '');
+                setIsEditing(true);
+              }
+            }} className={`px-4 py-2 rounded ${isEditing
+              ? 'bg-green-500 hover:bg-green-600'
+              : 'bg-blue-500 hover:bg-blue-600'
+              } text-white`}>
+              {isEditing ? 'Save Description' : 'Edit Description'}
+            </button>
+          </>
+        )}
         <p className="text-gray-600 mb-2">Owner Email: {company.ownerEmail}</p>
-        <p className="text-gray-600 mb-2">Description: {company.description}</p>
+        <p className="text-gray-600 mb-2">Description</p>
+        {isEditing ? (
+          <input
+            type="text"
+            name="description"
+            value={description}
+            onChange={handleDescriptionChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          />
+        ) : (
+          <p className="text-lg text-gray-800">{company.description}</p>
+        )}
         <div className="flex items-center mb-2">
           <span className="text-gray-600 mr-2">Rating:</span>
           <span className="text-yellow-500">{company.rating.toFixed(1)}</span>
@@ -236,6 +302,9 @@ const CompanyProfile: React.FC = () => {
         {/* Conditionally render the deleteCompany button based on role */}
         {role === Role.ADMIN && (
           <>
+            <button onClick={() => handleManageCompanyMembers(company)} className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+              Manage Company Members
+            </button>
             <button onClick={handleDeleteCompany} className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
               Delete Company
             </button>

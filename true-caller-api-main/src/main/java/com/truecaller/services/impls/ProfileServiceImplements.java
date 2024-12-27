@@ -9,38 +9,39 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ProfileServiceImplements implements ProfileService {
     @Autowired
-    private ProfileRepository repository;
+    private ProfileRepository profileRepository;
     @Override
     public Profile saveProfile(Profile profile) {
-        return repository.save(profile);
+        return profileRepository.save(profile);
     }
     private Logger logger = LoggerFactory.getLogger(ProfileServiceImplements.class);
     @Override
     public Optional<Profile> getProfileByPhoneNumber(String phoneNumber){
-        return repository.findByPhoneNumber(phoneNumber);
+        return profileRepository.findByPhoneNumber(phoneNumber);
     }
 
     @Override
     public Optional<Profile> getProfileByEmail(String email) {
-        return repository.findByEmail(email);
+        return profileRepository.findByEmail(email);
     }
 
     @Override
     public Optional<Profile> getProfileByCallerID(String number,String countryCode){
         logger.info("in profileServiceImplements number:"+number+" countryCode : "+countryCode);
-        return repository.findByCallerId(number,countryCode);
+        return profileRepository.findByCallerId(number,countryCode);
     }
 
     @Override
     public List<Profile> searchProfilesByName(String partialName) {
         // This will return an empty list if no matches are found
-        return repository.findByNameContaining(partialName);
+        return profileRepository.findByNameContaining(partialName);
     }
 
     @Override
@@ -50,7 +51,7 @@ public class ProfileServiceImplements implements ProfileService {
         } else {
             spammer.setNumberOfSpamSMSReports(spammer.getNumberOfSpamSMSReports() + 1);
         }
-        repository.save(spammer);
+        profileRepository.save(spammer);
     }
 
     @Override
@@ -61,7 +62,17 @@ public class ProfileServiceImplements implements ProfileService {
             numberOfSpamCalls++;
         } else numberOfSpamSMS++;
         Profile spammerProfile = new Profile(spamReport.getSpammerNumber(),spamReport.getSpammerCountryCode(),numberOfSpamCalls,numberOfSpamSMS);
-        repository.save(spammerProfile);
+        profileRepository.save(spammerProfile);
+    }
+
+    @Override
+    public List<Profile> getListOfProfiles(List<String> userIds) {
+        List<Profile> listOfMemberProfiles = new ArrayList<Profile>();
+        for(String profileId : userIds){
+            Optional<Profile> existing = profileRepository.findById(profileId);
+            existing.ifPresent(listOfMemberProfiles::add);
+        }
+        return listOfMemberProfiles;
     }
 
 }

@@ -38,6 +38,9 @@ public class Profile {
                 profile.getName(), profile.isVerified(), profile.getLocation(), profile.getNumberOfSpamCallReports(),
                 profile.getNumberOfSpamSMSReports());
     }
+    public ProfileWithoutContact convertToProfileWithoutContact(Profile profile){
+        return new ProfileWithoutContact(profile.getId(), profile.getEmail(),profile.getName(), profile.isVerified(), profile.getLocation(), profile.getNumberOfSpamCallReports(), profile.getNumberOfSpamSMSReports());
+    }
 
     public Profile(String id, String email, String password, String phoneNumber, String countryCode, String name,
                    boolean isVerified, String location, int numberOfSpamCallReports,

@@ -11,4 +11,7 @@ public interface RolesRepository extends MongoRepository<Roles, String> {
     Optional<Roles> findByProfileIdAndCompanyId(String profileId, String companyId);
     boolean existsByProfileIdAndCompanyIdAndRole(String userId, String companyId, Role role);
     void deleteByCompanyId(String companyId);
+    void deleteByProfileIdAndCompanyId(String profileId,String companyId);
+    List<String> findProfileIdsByCompanyId(String companyId);
+    List<Roles> findRolesByCompanyId(String companyId);
 }

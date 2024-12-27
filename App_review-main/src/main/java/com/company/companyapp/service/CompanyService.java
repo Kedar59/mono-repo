@@ -21,4 +21,5 @@ public interface CompanyService {
     Company save(Company company);
 
     List<Company> findAll();
+    Optional<Company> getCompanyById(String Id);
 }
