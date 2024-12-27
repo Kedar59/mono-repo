@@ -53,6 +53,7 @@ public class CompanyController {
 
     private final Logger logger = LoggerFactory.getLogger(CompanyController.class);
 
+
     // Endpoint to fetch all company names
     @GetMapping("/allCompanies")
     public ResponseEntity<List<CompanyDTO>> getAllCompanyNames() {
@@ -64,6 +65,10 @@ public class CompanyController {
     public ResponseEntity<List<CompanyDTO>> searchCompanies(@PathVariable String companyName) {
         List<CompanyDTO> companies = companyService.searchForCompanies(companyName); // Using service layer
         return ResponseEntity.ok(companies);
+    }
+    @DeleteMapping("/profile/{profileId}/company/{companyId}/delete")
+    public ResponseEntity<?> deleteCompany(@PathVariable String profileId,@PathVariable String companyId){
+        return companyService.deleteCompany(profileId,companyId);
     }
     @PostMapping("/addCompany")
     public ResponseEntity<?> addCompany(@RequestBody Company companyDetails) {

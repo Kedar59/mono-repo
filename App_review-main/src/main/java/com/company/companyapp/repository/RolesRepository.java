@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface RolesRepository extends MongoRepository<Roles, String> {
     Optional<Roles> findByProfileIdAndCompanyId(String profileId, String companyId);
     boolean existsByProfileIdAndCompanyIdAndRole(String userId, String companyId, Role role);
+    void deleteByCompanyId(String companyId);
 }

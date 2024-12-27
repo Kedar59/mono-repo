@@ -20,5 +20,6 @@ public interface CompanyBotRepository extends MongoRepository<CompanyBot, String
 
     // Find a CompanyBot by botUrl
     Optional<CompanyBot> findByBotUrl(String botUrl);
+    void deleteByCompanyName(String companyName);
 }
 

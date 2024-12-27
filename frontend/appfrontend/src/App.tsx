@@ -10,7 +10,11 @@ import SearchCompanies from "./components/SearchCompanies";
 import RegisterCompany from './components/RegisterCompany';
 import CompanyProfile from "./components/CompanyProfile";
 
-
+export interface ErrorResponse {
+    timestamp: Date;
+    message: string;
+    details: string;
+}
 
 
 const App: React.FC = () => {

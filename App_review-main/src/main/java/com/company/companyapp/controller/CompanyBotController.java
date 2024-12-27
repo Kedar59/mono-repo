@@ -8,6 +8,7 @@ import com.company.companyapp.service.CompanyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,14 +25,15 @@ public class CompanyBotController {
     @Autowired
     private CompanyBotService companyBotService;
     private Logger logger = LoggerFactory.getLogger(CompanyBotController.class);
-    @PostMapping("/addCompanyBot")
+    @PostMapping("/profile/{profileId}/company/{companyId}/addCompanyBot")
     public ResponseEntity<?> addCompanyBot(@RequestBody CompanyBot companyBot){
+        logger.info("IN add bot : ");
         Optional<CompanyBot> companyBotOptional = companyBotService.getCompanyBotByName(companyBot.getCompanyName());
         Optional<Company> companyOptional = companyService.getCompanyByName(companyBot.getCompanyName());
         if(companyBotOptional.isPresent()){
-            return ResponseEntity.ok(new ErrorResponse(LocalDateTime.now(),"Company has already registered bot","Bot already exists"));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ErrorResponse(LocalDateTime.now(),"Company has already registered bot","Bot already exists"));
         } else if(!companyOptional.isPresent()){
-            return ResponseEntity.ok(new ErrorResponse(LocalDateTime.now(),"Company not registered","Company doesn't exist"));
+            return ResponseEntity.status(HttpStatus.CREATED).body(new ErrorResponse(LocalDateTime.now(),"Company not registered","Company doesn't exist"));
         }
         return ResponseEntity.ok(companyBotService.createCompanyBot(companyBot));
     }
