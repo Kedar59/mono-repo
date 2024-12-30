@@ -73,7 +73,7 @@ const ManageCompanyMembers: React.FC = () => {
             if (response.status === 200) {
                 const membersList: CompanyMemberProfile[] = CompanyMemberProfileList;
                 membersList.push(data);
-                setSuccess('Bot registered successfully!');
+                setSuccess('Promoted successfully!');
                 setCompanyMemberProfileList(membersList);
             } else if (response.status === 201 || response.status === 202) {
                 setError(`Error: ${data.message}`);
@@ -89,17 +89,16 @@ const ManageCompanyMembers: React.FC = () => {
             setLoading(false);
         }
     };
-    const handleDemote = async () => {
-        if (!newProfileEmail.trim()) return;
+    const handleDemote = async (email: string) => {
         setLoading(true);
         setError(null);
         try {
-            console.log("email : " + newProfileEmail);
+            console.log("email : " + email);
             const response = await authenticatedFetch(
                 `http://localhost:8080/review_api/company/profile/${user?.id}/company/${company.id}/demote`,
                 'POST',
                 {
-                    email: newProfileEmail,
+                    email: email,
                 }
             );
             if (!response.ok) {
@@ -109,15 +108,13 @@ const ManageCompanyMembers: React.FC = () => {
             console.log("data : " + data);
             if (response.status === 200) {
                 const membersList: CompanyMemberProfile[] = CompanyMemberProfileList;
-                setSuccess('Bot registered successfully!');
+                setSuccess('Demoted successfully!');
                 setCompanyMemberProfileList(membersList.filter(member => member.profile.email !== data.profile.email));
             } else if (response.status === 201 || response.status === 202) {
                 setError(`Error: ${data.message}`);
             } else {
                 setError('An unexpected error occurred');
             }
-
-
         } catch (err) {
             setError((err as Error).message);
         } finally {
@@ -138,52 +135,110 @@ const ManageCompanyMembers: React.FC = () => {
     }
 
     return (
-        <div className="container mx-auto">
-            <div className="flex gap-4 mb-4">
-                <input
-                    type="text"
-                    value={newProfileEmail}
-                    onChange={(e) => setNewProfileEmail(e.target.value)}
-                    placeholder="Enter users email"
-                    className="border border-gray-300 rounded-lg px-4 py-2 w-full"
-                />
-                <button
-                    onClick={handlePromote}
-                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-                >
-                    Promote to Moderator
-                </button>
+        <div className="max-w-6xl mx-auto px-4 py-8">
+            {/* Header Section */}
+            <div className="mb-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    Managing Company Members
+                </h2>
+                <p className="text-gray-600">
+                    {company.name}
+                </p>
             </div>
-            {error && (
-                <div className="text-red-500 text-sm">{error}</div>
-            )}
 
-            {success && (
-                <div className="text-green-500 text-sm">{success}</div>
-            )}
-            <h2 className="text-xl font-bold mb-4">Managing company members for {company.name}</h2>
-            <ul className="list-none p-4">
-                {CompanyMemberProfileList.map((profile) => (
-                    <li key={profile.profile.id} className="flex items-center border-b border-gray-200 py-2">
-                        <div className="mr-4">
-                            <p className="text-lg font-medium">{profile.profile.name}</p>
-                            <p className="text-gray-500">{profile.profile.email}</p>
+            {/* Promote User Section */}
+            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h3 className="text-lg font-semibold mb-4">Add New Moderator</h3>
+                <div className="flex gap-4">
+                    <input
+                        type="text"
+                        value={newProfileEmail}
+                        onChange={(e) => setNewProfileEmail(e.target.value)}
+                        placeholder="Enter user's email"
+                        className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <button
+                        onClick={handlePromote}
+                        className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200 flex items-center gap-2"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                        </svg>
+                        Promote to Moderator
+                    </button>
+                </div>
+
+                {/* Status Messages */}
+                {error && (
+                    <div className="mt-4 bg-red-50 border-l-4 border-red-400 p-4">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm text-red-700">{error}</p>
+                            </div>
                         </div>
-                        <span className="inline-block bg-gray-200 px-2 rounded-full text-xs font-semibold text-gray-700">
-                            {profile.role}
-                        </span>
-                        {profile.role === Role.MODERATOR && (
-                            <>
-                                <button onClick={()=>{
-                                    setNewProfileEmail(profile.profile.email);
-                                    handleDemote();}} className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
-                                    Demote from Moderator
-                                </button>
-                            </>
-                        )}
-                    </li>
-                ))}
-            </ul>
+                    </div>
+                )}
+                {success && (
+                    <div className="mt-4 bg-green-50 border-l-4 border-green-400 p-4">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm text-green-700">{success}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Members List */}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-900">Company Members</h3>
+                </div>
+                <ul className="divide-y divide-gray-200">
+                    {CompanyMemberProfileList.map((profile) => (
+                        <li key={profile.profile.id} className="px-6 py-4 hover:bg-gray-50">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-900">{profile.profile.name}</p>
+                                    <p className="text-sm text-gray-500">{profile.profile.email}</p>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        ${profile.role === Role.ADMIN 
+                                            ? 'bg-purple-100 text-purple-800' 
+                                            : profile.role === Role.MODERATOR 
+                                            ? 'bg-blue-100 text-blue-800'
+                                            : 'bg-gray-100 text-gray-800'
+                                        }`}>
+                                        {profile.role}
+                                    </span>
+                                    {profile.role === Role.MODERATOR && (
+                                        <button 
+                                            onClick={() => handleDemote(profile.profile.email)}
+                                            className="inline-flex items-center px-3 py-2 border border-red-300 text-sm leading-4 font-medium rounded-md text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                                        >
+                                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            Demote
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            </div>
         </div>
     );
 };
