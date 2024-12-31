@@ -1,10 +1,11 @@
 // In any component where you need to make an authenticated request
 import React, { useState , useEffect } from "react";
-// import { Link , useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from './UseAuth.ts';
 import "../App.css";
 import getResponseData from "../util.tsx";
-
+import { User } from "./AuthContext.tsx";
+import { ErrorResponse } from "../App.tsx";
 interface Profile {
     id: string;
     email: string;
@@ -18,7 +19,8 @@ interface Profile {
 }
 
 const Profile: React.FC = () => {
-    const { authenticatedFetch, user } = useAuth();
+    const { authenticatedFetch, user ,updateUser} = useAuth();
+    const navigate = useNavigate();
     const [profile, setProfile] = useState<Profile | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -29,6 +31,8 @@ const Profile: React.FC = () => {
         countryCode: '',
     });
     const [isEditing, setIsEditing] = useState(false);
+    const [otp, setOtp] = useState("");
+    const [otpError, setOtpError] = useState<string | null>(null);
     useEffect(() => {
         const fetchProfile = async () => {
             try {
@@ -86,6 +90,41 @@ const Profile: React.FC = () => {
             setError(null);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
+        }
+    };
+    const handleOtpSubmit = async () => {
+        try {
+            if (!profile) return;
+
+            const body = {
+                mobileNumber: `${profile.countryCode}${profile.phoneNumber}`,
+                otp,
+                email: profile.email,
+            };
+            console.log(body);
+            const response = await authenticatedFetch(
+                "http://localhost:8080/truecaller_api/profile/validate", "POST", body
+            );
+
+            if (!response.ok) {
+                throw new Error('Invalid OTP');
+            }
+            console.log(response);
+            if(response.status===200){
+                const data: User = await getResponseData(response);
+                console.log(data);
+                updateUser(data);
+                navigate("/profile");
+                setOtp("");
+                setOtpError(null);
+            } else if(response.status === 201){
+                const data: ErrorResponse = await getResponseData(response);
+                console.log(data);
+                setOtpError(data.details);
+                setOtp("");
+            }
+        } catch (err) {
+            setOtpError(err instanceof Error ? err.message : 'An error occurred');
         }
     };
 
@@ -226,6 +265,39 @@ const Profile: React.FC = () => {
                             {profile.verified ? 'Verified' : 'Not Verified'}
                         </span>
                     </div>
+                    {/* OTP Verification Form */}
+                    {!profile.verified && (
+                        <div className="mt-6">
+                            <h3 className="text-lg font-medium text-gray-700">Verify OTP</h3>
+                            <p className="text-lg text-gray-800">
+                                Instructions : 
+                            </p>
+                            <p className="text-lg text-gray-800">
+                            1. Request otp with a telegram account of phone number : 
+                            `{profile.countryCode}{profile.phoneNumber}`
+                            at our telegram bot <a href="https://t.me/MeheryOtpbot" className="underline">@MeheryOtpbot</a>
+                            </p>
+                            <p className="text-lg text-gray-800">
+                            2. Otp expires in 5 minutes.
+                            </p>
+                            <div className="mt-4">
+                                <input
+                                    type="text"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value)}
+                                    placeholder="Enter OTP"
+                                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                />
+                                {otpError && <p className="text-red-500 text-sm mt-2">{otpError}</p>}
+                                <button
+                                    onClick={handleOtpSubmit}
+                                    className="mt-4 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
+                                >
+                                    Verify OTP
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

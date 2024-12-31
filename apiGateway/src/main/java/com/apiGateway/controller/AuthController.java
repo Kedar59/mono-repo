@@ -1,6 +1,5 @@
 package com.apiGateway.controller;
-import com.apiGateway.DTO.ProfileDTO;
-import com.apiGateway.entities.JwtResponse;
+import com.apiGateway.DTO.User;
 import com.apiGateway.entities.LoginResponse;
 import com.apiGateway.entities.Profile;
 import com.apiGateway.errors.ErrorResponse;
@@ -11,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -73,8 +71,8 @@ public class AuthController {
         );
         if (authentication.isAuthenticated()) {
             Profile profile = existingUserEmail.get();
-            ProfileDTO profileDTO = new ProfileDTO(profile.getId(), profile.getEmail(), profile.getName(), profile.isVerified());
-            return ResponseEntity.ok(new LoginResponse(jwtService.generateToken(authRequest.getEmail()),profileDTO));
+            User user = new User(profile.getId(), profile.getEmail(), profile.getName(), profile.isVerified());
+            return ResponseEntity.ok(new LoginResponse(jwtService.generateToken(authRequest.getEmail()), user));
         } else {
             throw new UsernameNotFoundException("Invalid user request!");
         }

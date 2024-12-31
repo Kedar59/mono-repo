@@ -85,9 +85,8 @@ public class ProfileController {
     }
     @PostMapping("/validate")
     public ResponseEntity<?> validateOtp(@RequestBody ValidateOtpDTO validateOtp){
-        String response = otpService.validateOtp(validateOtp.getMobileNumber(),validateOtp.getOtp()) ?
-                "OTP verified" : "OTP incorrect";
-        return ResponseEntity.ok(response);
+
+        return otpService.validateOtp(validateOtp.getMobileNumber(),validateOtp.getOtp(),validateOtp.getEmail());
     }
     @GetMapping("/getProfile")
     @ResponseBody

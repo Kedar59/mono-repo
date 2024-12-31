@@ -10,7 +10,7 @@ interface JWTPayload {
     // Add other claims as needed
 }
 
-interface User {
+export interface User {
     id: string;
     email: string;
     name: string;
@@ -22,6 +22,7 @@ interface AuthContextType {
     token: string | null;
     user: User | null;
     login: (token: string, user: User) => void;
+    updateUser: (user: User) => void;
     logout: () => void;
     authenticatedFetch: (url: string) => Promise<Response>,
     isAuthenticated: boolean;
@@ -33,6 +34,7 @@ const AuthContext = createContext<AuthContextType>({
     token: null,
     user: null,
     login: () => {},
+    updateUser: () => {},
     logout: () => {},
     authenticatedFetch: async () => new Response(),
     isAuthenticated: false,
@@ -68,7 +70,16 @@ const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
         }
         setLoading(false)
     }, []);
-
+    const updateUser = (user: User) => {
+        try {
+            // Convert the user object to a JSON string and store it in localStorage
+            localStorage.setItem('user', JSON.stringify(user));
+            setUser(user);
+            console.log("User updated in localStorage successfully.");
+        } catch (error) {
+            console.error("Failed to update user in localStorage:", error);
+        }
+    }
     // Login method
     const login = (newToken: string, user: User) => {
         try {
@@ -122,6 +133,7 @@ const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
         loading,
         user,
         login,
+        updateUser,
         logout,
         isAuthenticated: !!token,
         authenticatedFetch, // Add fetch wrapper to context

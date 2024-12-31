@@ -1,13 +1,21 @@
 package com.truecaller.services;
 
 import com.truecaller.config.TwilioConfig;
+import com.truecaller.entities.Profile;
+import com.truecaller.error.ErrorResponse;
+import com.truecaller.projections.User;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,6 +23,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class OtpService {
     @Autowired
     private TwilioConfig twilioConfig;
+    @Autowired
+    private ProfileService profileService;
     // This map will store OTPs and their expiration time temporarily in memory
     private ConcurrentHashMap<String, OtpData> otpStorage = new ConcurrentHashMap<>();
     private static final int OTP_EXPIRATION_MINUTES = 5;
@@ -54,21 +64,38 @@ public class OtpService {
         return "otp sent successfully to " + mobileNumber;
     }
     // validate OTP
-    public boolean validateOtp(String mobileNumber,String otp){
+    public ResponseEntity<?> validateOtp(String mobileNumber, String otp,String email){
         OtpData otpData = otpStorage.get(mobileNumber);
-
+        ErrorResponse error = new ErrorResponse();
         // Check if OTP exists and hasn't expired
         if (otpData != null && otpData.getOtp().equals(otp)) {
             if (System.currentTimeMillis() < otpData.getExpirationTime()) {
                 // OTP is valid
-                return true;
+                Optional<Profile> existingProfile = profileService.getProfileByEmail(email);
+                if(existingProfile.isEmpty()){
+                    error.setDetails("Counld'nt fetch profile with email : "+email);
+                    error.setMessage("Error while fetching profile with given email please try again later : ");
+                } else {
+                    Profile profile = existingProfile.get();
+                    profile.setVerified(true);
+                    Profile updatedProfile = profileService.saveProfile(profile);
+                    return ResponseEntity.ok(new User(updatedProfile.getId(),updatedProfile.getEmail(),updatedProfile.getName(),updatedProfile.isVerified()));
+                }
             } else {
                 // OTP expired
                 otpStorage.remove(mobileNumber); // Clean up expired OTP
+                error.setMessage("Otp expires after 5 minuits of receiving it please try again with another otp.");
+                error.setDetails("Otp for mobile number "+mobileNumber+" has expired");
             }
+        } else {
+            error.setMessage("Otp not found please request otp from mobile number of mouthshut account. On telegram.");
+            error.setDetails("Otp for mobile number : "+mobileNumber+" not found in memory database.");
         }
-
-        return false; // OTP is invalid or expired
+        if (otpData != null && !otpData.getOtp().equals(otp)) {
+            error.setMessage("Incorrect otp. Please try again");
+            error.setMessage("Incorrect otp for mobile number : "+mobileNumber);
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(error);
     }
     private static class OtpData {
         private String otp;

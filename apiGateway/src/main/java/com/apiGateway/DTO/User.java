@@ -1,13 +1,13 @@
 package com.apiGateway.DTO;
 
-public class ProfileDTO {
+public class User {
     private String id;
     private String email;
     private String name;
     private Boolean verified;
 
-    public ProfileDTO(){}
-    public ProfileDTO(String id, String email, String name, Boolean verified) {
+    public User(){}
+    public User(String id, String email, String name, Boolean verified) {
         this.id = id;
         this.email = email;
         this.name = name;

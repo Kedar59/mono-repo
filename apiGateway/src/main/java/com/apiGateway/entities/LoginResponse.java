@@ -1,12 +1,12 @@
 package com.apiGateway.entities;
 
-import com.apiGateway.DTO.ProfileDTO;
+import com.apiGateway.DTO.User;
 
 public class LoginResponse {
     private String jwtToken;
-    private ProfileDTO profile;
+    private User profile;
 
-    public LoginResponse(String jwtToken, ProfileDTO profile) {
+    public LoginResponse(String jwtToken, User profile) {
         this.jwtToken = jwtToken;
         this.profile = profile;
     }
@@ -20,11 +20,11 @@ public class LoginResponse {
         this.jwtToken = jwtToken;
     }
 
-    public ProfileDTO getProfile() {
+    public User getProfile() {
         return profile;
     }
 
-    public void setProfile(ProfileDTO profile) {
+    public void setProfile(User profile) {
         this.profile = profile;
     }
 }
